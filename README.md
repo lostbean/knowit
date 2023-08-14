@@ -18,6 +18,12 @@ createuser postgres
 createdb knowit_dev
 ```
 
+Start server:
+
+```bash
+mix phx.server
+```
+
 ## Learn more
 
   * Official website: https://www.phoenixframework.org/
