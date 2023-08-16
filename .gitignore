@@ -38,3 +38,6 @@ npm-debug.log
 
 # local PG DB
 /.pg_data
+
+# direnv stuff
+/.direnv
