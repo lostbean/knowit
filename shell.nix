@@ -8,5 +8,7 @@
             pkgs.buildPackages.rebar3
             pkgs.buildPackages.flyctl
             pkgs.buildPackages.postgresql
+            # add macos header to build mac_listener 
+            pkgs.darwin.apple_sdk.frameworks.CoreServices
         ];
 }
