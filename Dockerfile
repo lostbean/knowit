@@ -21,8 +21,12 @@ ARG RUNNER_IMAGE="debian:${DEBIAN_VERSION}"
 FROM ${BUILDER_IMAGE} as builder
 
 # install build dependencies
-RUN apt-get update -y && apt-get install -y build-essential git \
+RUN apt-get update -y && apt-get install -y build-essential git curl \
     && apt-get clean && rm -f /var/lib/apt/lists/*_*
+
+# and install node (support JS asset install -- https://community.fly.io/t/elixir-alpinejs-on-fly-fail-to-install/5542/21)
+RUN curl -sL https://deb.nodesource.com/setup_16.x | bash
+RUN apt-get install nodejs
 
 # prepare build dir
 WORKDIR /app
@@ -50,6 +54,9 @@ COPY priv priv
 COPY lib lib
 
 COPY assets assets
+
+# and install node (support JS asset install -- https://community.fly.io/t/elixir-alpinejs-on-fly-fail-to-install/5542/21)
+RUN npm install --prefix assets/
 
 # compile assets
 RUN mix assets.deploy
