@@ -21,8 +21,12 @@ import "phoenix_html"
 import { Socket } from "phoenix"
 import { LiveSocket } from "phoenix_live_view"
 import topbar from "../vendor/topbar"
+import { Graph } from "./graph" 
 
-let hooks = {}
+let hooks = {};
+
+hooks.graph = Graph;
+
 hooks.chart = {
     mounted() {
         var ctx = this.el.getContext('2d');

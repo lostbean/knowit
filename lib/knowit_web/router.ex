@@ -1,5 +1,5 @@
 defmodule KnowitWeb.Router do
-  use KnowitWeb, :router
+    use KnowitWeb, :router
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -19,6 +19,7 @@ defmodule KnowitWeb.Router do
 
     get "/", PageController, :home
     live "/chart", ChartLive, :index
+    live "/graph", GraphLive, :index
   end
 
   # Other scopes may use custom stacks.
