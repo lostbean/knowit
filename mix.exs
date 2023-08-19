@@ -49,7 +49,10 @@ defmodule Knowit.MixProject do
       {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.2"},
-      {:plug_cowboy, "~> 2.5"}
+      {:plug_cowboy, "~> 2.5"},
+      {:nx, "~> 0.6"},
+      {:bumblebee, "~> 0.3.1"},
+      {:exla, "~> 0.6"}
     ]
   end
 

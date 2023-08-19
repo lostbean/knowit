@@ -22,10 +22,12 @@ import { Socket } from "phoenix"
 import { LiveSocket } from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 import { Graph } from "./graph" 
+import { Microphone } from "./mic" 
 
 let hooks = {};
 
 hooks.graph = Graph;
+hooks.microphone = Microphone;
 
 hooks.chart = {
     mounted() {

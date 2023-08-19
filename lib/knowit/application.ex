@@ -17,9 +17,13 @@ defmodule Knowit.Application do
       # Start Finch
       {Finch, name: Knowit.Finch},
       # Start the Endpoint (http/https)
-      KnowitWeb.Endpoint
+      KnowitWeb.Endpoint,
       # Start a worker by calling: Knowit.Worker.start_link(arg)
       # {Knowit.Worker, arg}
+      {Nx.Serving,
+       name: Knowit.Serving.AudioToText,
+       serving: Knowit.Serving.AudioToText.serving(batch_size: 8),
+       batch_timeout: 100}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

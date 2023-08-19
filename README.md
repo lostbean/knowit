@@ -24,6 +24,13 @@ Start server:
 mix phx.server
 ```
 
+## Adding JS deps
+
+```bash
+cd assets/
+npm install <PACKAGE_NAME> --save
+```
+
 ## Learn more
 
   * Official website: https://www.phoenixframework.org/
