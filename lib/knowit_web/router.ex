@@ -18,7 +18,7 @@ defmodule KnowitWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
-    live "/chart", ChartLive, :index
+    live "/audiototext", AudioToTextLive, :index
     live "/graph", GraphLive, :index
   end
 

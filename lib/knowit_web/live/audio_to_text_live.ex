@@ -1,19 +1,12 @@
-defmodule KnowitWeb.ChartLive do
+defmodule KnowitWeb.AudioToTextLive do
   use KnowitWeb, :live_view
 
   @impl true
   def mount(_params, _session, socket) do
-    schedule_update()
     {:ok,
      socket
      |> assign(transcription: nil, task: nil)
      |> allow_upload(:audio, accept: :any, progress: &handle_progress/3, auto_upload: true)}
-  end
-
-  @impl true
-  def handle_event("next", _, socket) do
-    schedule_update()
-    {:noreply, socket |> push_event("points", %{points: get_points()})}
   end
 
   @impl true
@@ -50,6 +43,4 @@ defmodule KnowitWeb.ChartLive do
   @impl true
   def handle_info(_info, socket), do: {:noreply, socket}
 
-  defp schedule_update, do: self() |> Process.send_after(:update, 2000)
-  defp get_points, do: 1..7 |> Enum.map(fn _ -> :rand.uniform(100) end)
 end
