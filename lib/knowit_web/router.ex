@@ -20,6 +20,7 @@ defmodule KnowitWeb.Router do
     get "/", PageController, :home
     live "/audiototext", AudioToTextLive, :index
     live "/graph", GraphLive, :index
+    live "/interview", InterviewLive, :index
   end
 
   # Other scopes may use custom stacks.
