@@ -26,7 +26,7 @@ RUN apt-get update -y && apt-get install -y build-essential git curl \
 
 # and install node (support JS asset install -- https://community.fly.io/t/elixir-alpinejs-on-fly-fail-to-install/5542/21)
 RUN curl -sL https://deb.nodesource.com/setup_16.x | bash
-RUN apt-get install nodejs
+RUN apt-get install -y nodejs
 
 # prepare build dir
 WORKDIR /app
@@ -37,6 +37,7 @@ RUN mix local.hex --force && \
 
 # set build ENV
 ENV MIX_ENV="prod"
+ENV BUMBLEBEE_CACHE_DIR=/app/.bumblebee
 
 # install mix dependencies
 COPY mix.exs mix.lock ./
@@ -70,6 +71,18 @@ COPY config/runtime.exs config/
 COPY rel rel
 RUN mix release
 
+# RUN ldd -v /app/_build/prod/lib/exla/priv/xla_extension/lib/libxla_extension.so
+# RUN strings /usr/lib/aarch64-linux-gnu/libstdc++.so.6 | grep GLIBCXX
+# RUN ls -lah /usr/lib/aarch64-linux-gnu/ | grep libstdc 
+# Download the HuggingFace models to cache them
+# RUN apt-get update -y && apt-get install -y bazel
+# ENV XLA_BUILD=true
+# ENV XLA_TARGET=cpu
+# RUN mix deps.clean xla --build
+ENV DATABASE_URL=``
+ENV SECRET_KEY_BASE=``
+RUN mix run -e 'Knowit.Serving.AudioToText.serving()'
+
 # start a new build stage so that the final image will only contain
 # the compiled release and other runtime necessities
 FROM ${RUNNER_IMAGE}
@@ -89,6 +102,8 @@ RUN chown nobody /app
 
 # set runner ENV
 ENV MIX_ENV="prod"
+ENV BUMBLEBEE_CACHE_DIR=/app/.bumblebee
+ENV BUMBLEBEE_OFFLINE=true
 
 # Only copy the final release from the build stage
 COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/knowit ./
