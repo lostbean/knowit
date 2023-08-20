@@ -52,7 +52,8 @@ defmodule Knowit.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:nx, "~> 0.6"},
       {:bumblebee, "~> 0.3.1"},
-      {:exla, "~> 0.6"}
+      {:exla, "~> 0.6"},
+      {:openai, "~> 0.5.2"}
     ]
   end
 

@@ -20,6 +20,14 @@ if System.get_env("PHX_SERVER") do
   config :knowit, KnowitWeb.Endpoint, server: true
 end
 
+config :openai, [
+    # find it at https://platform.openai.com/account/api-keys
+    api_key: System.get_env("OPENAI_TOKEN") ||
+      raise """
+      environment variable OPENAI_TOKEN is missing.
+      """
+  ]
+
 if config_env() == :prod do
   database_url =
     System.get_env("DATABASE_URL") ||

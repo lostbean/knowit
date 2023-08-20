@@ -41,3 +41,6 @@ npm-debug.log
 
 # direnv stuff
 /.direnv
+
+# local dev vars
+/.env
