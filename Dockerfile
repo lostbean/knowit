@@ -79,8 +79,8 @@ RUN mix release
 # ENV XLA_BUILD=true
 # ENV XLA_TARGET=cpu
 # RUN mix deps.clean xla --build
-ENV DATABASE_URL=`ecto://postgres:postgres@localhost/ecto_simple`
-ENV SECRET_KEY_BASE=`xxxxxx`
+ENV DATABASE_URL="ecto://postgres:postgres@localhost.test/ecto_simple"
+ENV SECRET_KEY_BASE="xxxxxx"
 RUN mix run -e 'Knowit.Serving.AudioToText.serving()'
 
 # start a new build stage so that the final image will only contain
