@@ -8,7 +8,15 @@ export const Microphone = {
       this.startRecording();
     });
 
+    this.el.addEventListener("touchstart", (event) => {
+      this.startRecording();
+    });
+
     this.el.addEventListener("mouseup", (event) => {
+      this.stopRecording();
+    });
+
+    this.el.addEventListener("touchend", (event) => {
       this.stopRecording();
     });
   },
