@@ -79,7 +79,7 @@ RUN mix release
 # ENV XLA_BUILD=true
 # ENV XLA_TARGET=cpu
 # RUN mix deps.clean xla --build
-ENV DATABASE_URL=`postgres://user:password@localhost:5432/test`
+ENV DATABASE_URL=`ecto://postgres:postgres@localhost/ecto_simple`
 ENV SECRET_KEY_BASE=`xxxxxx`
 RUN mix run -e 'Knowit.Serving.AudioToText.serving()'
 
