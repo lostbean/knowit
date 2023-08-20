@@ -71,14 +71,6 @@ COPY config/runtime.exs config/
 COPY rel rel
 RUN mix release
 
-# RUN ldd -v /app/_build/prod/lib/exla/priv/xla_extension/lib/libxla_extension.so
-# RUN strings /usr/lib/aarch64-linux-gnu/libstdc++.so.6 | grep GLIBCXX
-# RUN ls -lah /usr/lib/aarch64-linux-gnu/ | grep libstdc 
-# Download the HuggingFace models to cache them
-# RUN apt-get update -y && apt-get install -y bazel
-# ENV XLA_BUILD=true
-# ENV XLA_TARGET=cpu
-# RUN mix deps.clean xla --build
 ENV DATABASE_URL="ecto://postgres:postgres@localhost.test/ecto_simple"
 ENV SECRET_KEY_BASE="xxxxxx"
 RUN mix run -e 'Knowit.Serving.AudioToText.serving()'
@@ -107,6 +99,7 @@ ENV BUMBLEBEE_OFFLINE=true
 
 # Only copy the final release from the build stage
 COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/knowit ./
+COPY --from=builder --chown=nobody:root ${BUMBLEBEE_CACHE_DIR} ${BUMBLEBEE_CACHE_DIR}
 
 USER nobody
 
