@@ -1,16 +1,33 @@
-{ pkgs ? import <nixpkgs> {} }:
+{ pkgs ? import (fetchTarball "https://github.com/NixOS/nixpkgs/archive/refs/tags/23.05.tar.gz") {} }:
+with pkgs;
+
 let
-    frameworks = pkgs.darwin.apple_sdk.frameworks;
-in pkgs.mkShell {
+    frameworks = darwin.apple_sdk.frameworks;
+    inherit (lib) optional optionals;
+in mkShell {
         nativeBuildInputs = [ 
-            pkgs.buildPackages.elixir 
-            pkgs.buildPackages.elixir_ls
-            pkgs.buildPackages.nodejs 
-            pkgs.buildPackages.erlang 
-            pkgs.buildPackages.rebar3
-            pkgs.buildPackages.flyctl
-            pkgs.buildPackages.postgresql
-            # add macos header to build mac_listener 
+            buildPackages.elixir 
+            buildPackages.elixir_ls
+            buildPackages.nodejs 
+            buildPackages.erlang 
+            buildPackages.rebar3
+        ] ++ optionals stdenv.isDarwin [
+            # Dev environment
+            buildPackages.flyctl
+            buildPackages.postgresql
+            buildPackages.docker
+        ] ++ optionals stdenv.isLinux [
+            # Docker build
+            (python3.withPackages(ps: with ps; [ pip numpy ]))
+            buildPackages.stdenv
+            buildPackages.gcc
+            buildPackages.gnumake
+            buildPackages.bazel
+            buildPackages.glibc
+            buildPackages.gcc
+            buildPackages.glibcLocales
+        ] ++ optionals stdenv.isDarwin [
+            # add macOS headers to build mac_listener and ELXA
             frameworks.CoreServices
             frameworks.CoreFoundation
             frameworks.Foundation
