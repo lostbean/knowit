@@ -71,9 +71,7 @@ COPY config/runtime.exs config/
 COPY rel rel
 RUN mix release
 
-ENV DATABASE_URL="ecto://postgres:postgres@localhost.test/ecto_simple"
-ENV SECRET_KEY_BASE="xxxxxx"
-RUN mix run -e 'Knowit.Serving.AudioToText.serving()'
+RUN MIX_ENV="dev" mix run -e 'Knowit.Serving.AudioToText.serving()'
 
 # start a new build stage so that the final image will only contain
 # the compiled release and other runtime necessities
