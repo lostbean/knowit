@@ -11,9 +11,6 @@ defmodule KnowitWeb.GraphLive do
   @impl true
   def handle_event("loadGraph", _, socket) do
     schedule_update()
-    {:ok, res} = Knowit.Serving.OpenAI.run([])
-    msgs = Enum.map(res.choices, &(&1["message"]["content"]))
-    Logger.warn "message: #{msgs}"
     {:noreply, socket |> push_event("add_points", %{points: get_points()})}
   end
 
