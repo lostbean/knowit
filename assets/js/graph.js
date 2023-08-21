@@ -13,23 +13,21 @@ export const Graph = {
                 {
                     selector: 'node',
                     style: {
-                        label: (node) => {
+                        'label': (node) => {
                             const name = node.data('name') || node.data('edge') || node.data('id');
                             return node.data('object_base') === true ? '' : name;
                         },
-                        shape: (node) => node.data('object_base') === true ? 'round-rectangle' : 'ellipse',
-                        backgroundColor: (node) => {
+                        'shape': (node) => node.data('object_base') === true ? 'round-rectangle' : 'ellipse',
+                        'background-color': (node) => {
                             if (node.isChild) {
                                 const parent = node.parent();
                                 const color = parent.style('background-color');
-                                return 'red' // TODO
+                                return '#60A5FA' // TODO
                             } else {
-                                return 'gray';
+                                return '#A8A29E';
                             }
                         },
-                    },
-                    css: {
-                        'border-color': 'gray',
+                        'border-color': '#78716C',
                         'border-width': '1px',
                         'text-outline-color': '#FFF',
                         'text-outline-opacity': 0.9,
@@ -42,11 +40,9 @@ export const Graph = {
                 {
                     selector: ':parent',
                     style: {
-                        label: (node) => node.data('name') || node.data('id'),
-                        backgroundColor: (node) => node.data('color') || 'gray',
-                        shape: 'round-rectangle'
-                    },
-                    css: {
+                        'label': (node) => node.data('name') || node.data('id'),
+                        'background-color': (node) => node.data('color') || 'gray',
+                        'shape': 'round-rectangle',
                         'background-opacity': 0.5,
                         'text-valign': 'top',
                         'text-halign': 'center',
@@ -55,16 +51,17 @@ export const Graph = {
                 {
                     selector: 'edge',
                     style: {
+                        'label': (edge) => edge.data('type') || edge.data('id'),
                         "line-style": (edge) => {
                             const edgeType = edge.data('name');
                             return (edgeType == 'inference_link') ? 'dashed' : 'solid'
-                        }
-                    },
-                    css: {
+                        },
                         'text-rotation': 'autorotate',
                         'text-outline-color': '#FFF',
                         'text-outline-opacity': 0.9,
                         'text-outline-width': 2,
+                        "text-margin-x": "0px",
+                        "text-margin-y": "0px",
                         'font-size': 11,
                         'curve-style': 'bezier',
                         'target-arrow-shape': 'triangle'
