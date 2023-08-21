@@ -8,11 +8,14 @@ export const SendText = {
       this.send();
     });
 
-    this.el.addEventListener("keydown", (e) => {
-      if (e.key == "Enter" && e.shiftKey == false) {
-        this.send();
-      }
-    })
+    const textarea = document.getElementById("text_input");
+    if (textarea) {
+      textarea.addEventListener("keydown", (e) => {
+        if ((e.ctrlKey || e.metaKey) && (e.key == 13 || e.key == 10 || (e.key == "Enter"))) {
+          this.send();
+        }
+      });
+    }
   },
 
   send() {
