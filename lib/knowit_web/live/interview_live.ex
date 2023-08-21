@@ -18,6 +18,17 @@ defmodule KnowitWeb.InterviewLive do
     {:noreply, socket}
   end
 
+  @impl true
+  def handle_event("text_input", input, socket) do
+    if String.length(input) > 0 do
+      Logger.warn(input)
+      graph_task = Task.async(fn -> Knowit.Serving.OpenAI.extract_knowledge_graph(input) end)
+      {:noreply, assign(socket, graph_task: graph_task)}
+    else
+      {:noreply, socket}
+    end
+  end
+
   defp handle_progress(:audio, entry, socket) when entry.done? do
     binary =
       consume_uploaded_entry(socket, entry, fn %{path: path} ->
@@ -38,11 +49,8 @@ defmodule KnowitWeb.InterviewLive do
   def handle_info({ref, result}, socket) when socket.assigns.transcription_task.ref == ref do
     Process.demonitor(ref, [:flush])
     %{results: [%{text: text}]} = result
-
     Logger.warn "transcription: #{text}"
-    graph_task = Task.async(fn -> Knowit.Serving.OpenAI.extract_knowledge_graph(text) end)
-
-    {:noreply, assign(socket, transcription: text, transcription_task: nil, graph_task: graph_task)}
+    {:noreply, assign(socket, transcription: text, transcription_task: nil)}
   end
 
   @impl true

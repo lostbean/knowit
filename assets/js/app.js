@@ -23,11 +23,13 @@ import { LiveSocket } from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 import { Graph } from "./graph" 
 import { Microphone } from "./mic" 
+import { SendText } from "./send_text" 
 
 let hooks = {};
 
 hooks.graph = Graph;
 hooks.microphone = Microphone;
+hooks.send_text = SendText;
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, { params: { _csrf_token: csrfToken }, hooks })

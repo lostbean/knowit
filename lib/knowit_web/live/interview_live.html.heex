@@ -3,7 +3,7 @@
     <div id="cy" phx-hook="graph" class="w-full h-full"></div>
   </div>
 
-  <div id="capture" class="h-24 w-full flex flex-row select-none">
+  <div id="capture" class="h-auto w-full flex flex-row select-none">
     <div id="audio-capture" class="h-auto w-auto">
       <button
         type="button"
@@ -33,17 +33,38 @@
       </form>
     </div>
 
-    <div id="transcription-output" class="flex flex-col w-full h-24">
-      <label for="message" class="h-8 block mb-2 text-sm font-medium text-gray-900 dark:text-black">
-        Tell more about you?
+    <div id="transcription-output" class="flex flex-col w-full h-auto">
+      <label
+        for="text_input"
+        class="h-8 block mb-2 text-sm font-medium text-gray-900 dark:text-black"
+      >
+        Tell me more about you?
       </label>
-      <textarea readonly
-        id="message"
-        rows="4"
-        class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-        placeholder={(if @transcription_task, do: "Hang in there. Processing...", else: "I'm listening... Press and hold the mic to answer the question.")}
-      ><%= @transcription || "" %></textarea>
+      <div id="text" class="h-20">
+        <textarea
+          id="text_input"
+          rows="4"
+          class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          placeholder={
+            if @transcription_task,
+              do: "Hang in there. Processing...",
+              else: "I'm listening... Type or just press and hold the mic to answer the question."
+          }
+        ><%= @transcription || "" %></textarea>
+        <svg
+          id="send"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 48 48"
+          stroke="none"
+          fill="white"
+          phx-hook="send_text"
+          class="relative bottom-20 right-4 w-24 h-24"
+          transform="scale(0.25)"
+        >
+          <path d="M4.02 42l41.98-18-41.98-18-.02 14 30 4-30 4z" />
+          <path d="M0 0h48v48h-48z" fill="none" />
+        </svg>
+      </div>
     </div>
-
   </div>
 </div>
