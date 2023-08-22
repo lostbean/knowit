@@ -77,7 +77,8 @@ if config_env() == :prod do
       System.get_env("DISCORD_BOT_TOKEN") ||
         raise("""
         environment variable DISCORD_BOT_TOKEN is missing.
-        """)
+        """),
+    gateway_intents: :all
   ]
 
   # ## SSL Support
@@ -137,6 +138,9 @@ else
   # ====================================================
   config :openai, api_key: System.get_env("OPENAI_TOKEN")
 
-  config :nostrum, token: System.get_env("DISCORD_BOT_TOKEN")
+  config :nostrum, [
+    token: System.get_env("DISCORD_BOT_TOKEN"),
+    gateway_intents: :all
+  ]
 
 end
