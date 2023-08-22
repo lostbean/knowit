@@ -1,9 +1,14 @@
 defmodule KnowitWeb.InterviewLive do
   use KnowitWeb, :live_view
   require Logger
+  alias Knowit.Serving.DiscordBot
+
+  @topic inspect(DiscordBot)
 
   @impl true
   def mount(_params, _session, socket) do
+    DiscordBot.subscribe()
+
     {:ok,
      socket
      |> assign(transcription: nil, transcription_task: nil, graph_task: nil, graph: nil)
@@ -38,7 +43,8 @@ defmodule KnowitWeb.InterviewLive do
     # We always pre-process audio on the client into a single channel
     audio = Nx.from_binary(binary, :f32)
 
-    transcription_task = Task.async(fn -> Nx.Serving.batched_run(Knowit.Serving.AudioToText, audio) end)
+    transcription_task =
+      Task.async(fn -> Nx.Serving.batched_run(Knowit.Serving.AudioToText, audio) end)
 
     {:noreply, assign(socket, transcription_task: transcription_task)}
   end
@@ -49,7 +55,7 @@ defmodule KnowitWeb.InterviewLive do
   def handle_info({ref, result}, socket) when socket.assigns.transcription_task.ref == ref do
     Process.demonitor(ref, [:flush])
     %{results: [%{text: text}]} = result
-    Logger.warn "transcription: #{text}"
+    Logger.warn("transcription: #{text}")
     {:noreply, assign(socket, transcription: text, transcription_task: nil)}
   end
 
@@ -57,23 +63,45 @@ defmodule KnowitWeb.InterviewLive do
   def handle_info({ref, result}, socket) when socket.assigns.graph_task.ref == ref do
     Process.demonitor(ref, [:flush])
     triples_text = result |> Enum.map(&Enum.join(&1, " <> "))
-    Logger.warn "graph:\n#{triples_text |> Enum.join("\n")}"
-    {:noreply, assign(
-      socket,
-      graph: triples_text,
-      graph_task: nil) |> push_event("add_points", %{points: genCytoscapeData(result)})}
+    Logger.warn("graph:\n#{triples_text |> Enum.join("\n")}")
+
+    {:noreply,
+     assign(
+       socket,
+       graph: triples_text,
+       graph_task: nil
+     )
+     |> push_event("add_points", %{points: genCytoscapeData(result)})}
   end
 
   @impl true
-  def handle_info(_info, socket), do: {:noreply, socket}
+  def handle_info(%{topic: @topic, event: "msg", payload: msg}, socket) do
+    if String.length(msg.content) > 0 do
+      Logger.warn("extracting triples from #{msg.author.username}: #{msg.content}")
+      graph_task = Task.async(fn -> Knowit.Serving.OpenAI.extract_knowledge_graph(msg.content) end)
+      {:noreply, assign(socket, graph_task: graph_task)}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  @impl true
+  def handle_info(_info, socket) do
+    {:noreply, socket}
+  end
 
   def genCytoscapeData(triples) do
-    nodes = triples |> Enum.flat_map(fn [a, _, c] -> [a, c] end) |> Enum.map(&(%{data: %{id: &1}}))
-    edges = triples |> Enum.flat_map(fn [a, b, c] -> [%{data: %{id: a <> b <> c, source: a, target: c, type: b}}] end)
+    nodes = triples |> Enum.flat_map(fn [a, _, c] -> [a, c] end) |> Enum.map(&%{data: %{id: &1}})
+
+    edges =
+      triples
+      |> Enum.flat_map(fn [a, b, c] ->
+        [%{data: %{id: a <> b <> c, source: a, target: c, type: b}}]
+      end)
+
     %{
       nodes: nodes,
       edges: edges
     }
   end
-
 end

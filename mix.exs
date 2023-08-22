@@ -53,7 +53,9 @@ defmodule Knowit.MixProject do
       {:nx, "~> 0.6"},
       {:bumblebee, "~> 0.3.1"},
       {:exla, "~> 0.6"},
-      {:openai, "~> 0.5.2"}
+      {:openai, "~> 0.5.2"},
+      # Discord Bot
+      {:nostrum, "~> 0.8.0"}
     ]
   end
 

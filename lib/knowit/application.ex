@@ -23,7 +23,9 @@ defmodule Knowit.Application do
       {Nx.Serving,
        name: Knowit.Serving.AudioToText,
        serving: Knowit.Serving.AudioToText.serving(batch_size: 8),
-       batch_timeout: 100}
+       batch_timeout: 100},
+
+      Knowit.Serving.DiscordBot
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

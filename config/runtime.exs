@@ -72,6 +72,14 @@ if config_env() == :prod do
         """)
   ]
 
+  config :nostrum, [
+    token:
+      System.get_env("DISCORD_BOT_TOKEN") ||
+        raise("""
+        environment variable DISCORD_BOT_TOKEN is missing.
+        """)
+  ]
+
   # ## SSL Support
   #
   # To get SSL working, you will need to add the `https` key
@@ -128,5 +136,7 @@ else
   #                 non-prod configs
   # ====================================================
   config :openai, api_key: System.get_env("OPENAI_TOKEN")
+
+  config :nostrum, token: System.get_env("DISCORD_BOT_TOKEN")
 
 end
