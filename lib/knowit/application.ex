@@ -20,18 +20,26 @@ defmodule Knowit.Application do
       KnowitWeb.Endpoint,
       # Start a worker by calling: Knowit.Worker.start_link(arg)
       # {Knowit.Worker, arg}
+      Knowit.Serving.DiscordBot
+    ]
+
+    hf_cache_only_children = [
       {Nx.Serving,
        name: Knowit.Serving.AudioToText,
        serving: Knowit.Serving.AudioToText.serving(batch_size: 8),
-       batch_timeout: 100},
-
-      Knowit.Serving.DiscordBot
+       batch_timeout: 100}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Knowit.Supervisor]
-    Supervisor.start_link(children, opts)
+
+    if System.get_env("HF_CACHE_ONLY") == "true" do
+      IO.puts("Only starting applications to fetch and cache models")
+      Supervisor.start_link(hf_cache_only_children, opts)
+    else
+      Supervisor.start_link(children + hf_cache_only_children, opts)
+    end
   end
 
   # Tell Phoenix to update the endpoint configuration

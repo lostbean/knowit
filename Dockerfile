@@ -67,9 +67,9 @@ RUN mix compile
 COPY rel rel
 RUN mix release
 
-RUN MIX_ENV="dev" mix deps.get
-RUN MIX_ENV="dev" mix deps.compile
-RUN MIX_ENV="dev" mix run -e 'Knowit.Serving.AudioToText.serving()'
+RUN HF_CACHE_ONLY="true" MIX_ENV="dev" mix deps.get
+RUN HF_CACHE_ONLY="true" MIX_ENV="dev" mix deps.compile
+RUN HF_CACHE_ONLY="true" MIX_ENV="dev" mix run -e 'Knowit.Serving.AudioToText.serving()'
 
 # start a new build stage so that the final image will only contain
 # the compiled release and other runtime necessities
