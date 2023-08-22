@@ -38,7 +38,7 @@ defmodule Knowit.Application do
       IO.puts("Only starting applications to fetch and cache models")
       Supervisor.start_link(hf_cache_only_children, opts)
     else
-      Supervisor.start_link(children + hf_cache_only_children, opts)
+      Supervisor.start_link(children ++ hf_cache_only_children, opts)
     end
   end
 
