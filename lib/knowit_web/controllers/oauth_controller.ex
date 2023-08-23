@@ -7,7 +7,7 @@ defmodule KnowitWeb.OAuthController do
 
   def callback(conn, %{"code" => code}) do
     client = Knowit.OAuthClient.handle_callback(%{code: code})
-    resource = OAuth2.Client.get!(client, "/api/v6/users/@me").body |> Jason.decode!
+    _resource = OAuth2.Client.get!(client, "/api/v6/users/@me").body |> Jason.decode!
     redirect(conn, to: "/interview")
   end
 end
