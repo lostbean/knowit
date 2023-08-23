@@ -55,7 +55,8 @@ defmodule Knowit.MixProject do
       {:exla, "~> 0.6"},
       {:openai, "~> 0.5.2"},
       # Discord Bot
-      {:nostrum, "~> 0.8.0", runtime: Mix.env() != :CI}
+      {:nostrum, "~> 0.8.0", runtime: Mix.env() != :CI},
+      {:oauth2, ">= 0.0.0"},
     ]
   end
 

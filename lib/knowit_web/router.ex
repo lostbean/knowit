@@ -23,6 +23,11 @@ defmodule KnowitWeb.Router do
     live "/interview", InterviewLive, :index
   end
 
+  scope "/auth", KnowitWeb do
+    get "/link", OAuthController, :start_oauth
+    get "/callback", OAuthController, :callback
+  end
+
   # Other scopes may use custom stacks.
   # scope "/api", KnowitWeb do
   #   pipe_through :api

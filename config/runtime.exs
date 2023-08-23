@@ -16,6 +16,14 @@ import Config
 #
 # Alternatively, you can use `mix phx.gen.release` to generate a `bin/server`
 # script that automatically sets the env var above.
+
+defmodule Utils do
+  def get_env_or_fail(env) do
+    System.get_env(env) ||
+      raise "environment variable #{env} is missing."
+  end
+end
+
 if System.get_env("PHX_SERVER") do
   config :knowit, KnowitWeb.Endpoint, server: true
 end
@@ -65,21 +73,17 @@ if config_env() == :prod do
 
   config :openai, [
     # find it at https://platform.openai.com/account/api-keys
-    api_key:
-      System.get_env("OPENAI_TOKEN") ||
-        raise("""
-        environment variable OPENAI_TOKEN is missing.
-        """)
+    api_key: Utils.get_env_or_fail("OPENAI_TOKEN")
   ]
 
-  config :nostrum, [
-    token:
-      System.get_env("DISCORD_BOT_TOKEN") ||
-        raise("""
-        environment variable DISCORD_BOT_TOKEN is missing.
-        """),
+  config :nostrum,
+    token: Utils.get_env_or_fail("DISCORD_BOT_TOKEN"),
     gateway_intents: :all
-  ]
+
+  config :knowit, Knowit.OAuthClient,
+    external_hostname: Utils.get_env_or_fail("DISCORD_CALLBACK_URL"),
+    client_id: Utils.get_env_or_fail("DISCORD_CLIENT_ID"),
+    client_secret: Utils.get_env_or_fail("DISCORD_CLIENT_SECRET")
 
   # ## SSL Support
   #
@@ -130,9 +134,7 @@ if config_env() == :prod do
   #     config :swoosh, :api_client, Swoosh.ApiClient.Hackney
   #
   # See https://hexdocs.pm/swoosh/Swoosh.html#module-installation for details.
-
 else
-
   # ====================================================
   #                 non-prod configs
   # ====================================================
@@ -143,4 +145,8 @@ else
     gateway_intents: :all
   ]
 
+  config :knowit, Knowit.OAuthClient,
+    external_hostname: System.get_env("DISCORD_CALLBACK_URL"),
+    client_id: System.get_env("DISCORD_CLIENT_ID"),
+    client_secret: System.get_env("DISCORD_CLIENT_SECRET")
 end
