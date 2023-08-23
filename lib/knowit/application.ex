@@ -18,9 +18,10 @@ defmodule Knowit.Application do
       {Finch, name: Knowit.Finch},
       # Start the Endpoint (http/https)
       KnowitWeb.Endpoint,
-      # Start a worker by calling: Knowit.Worker.start_link(arg)
-      # {Knowit.Worker, arg}
-      Knowit.Serving.DiscordBot
+      # Start Discord Bot
+      Knowit.Serving.DiscordBot,
+      # Start Task supervisor
+      {Task.Supervisor, name: Knowit.TaskSupervisor}
     ]
 
     hf_cache_only_children = [

@@ -40,6 +40,17 @@
       >
         Tell me more about you?
       </label>
+      
+      <%= if @notification do %>
+        <div
+          id="notification"
+          class="text-sm bg-orange-100 border-l-4 border-orange-500 text-orange-700 p-4 m-2"
+          role="alert"
+        >
+          <%= @notification || "" %>
+        </div>
+      <% end %>
+
       <div id="text" class="h-20">
         <textarea
           id="text_input"

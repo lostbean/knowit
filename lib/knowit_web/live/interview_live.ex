@@ -11,7 +11,13 @@ defmodule KnowitWeb.InterviewLive do
 
     {:ok,
      socket
-     |> assign(transcription: nil, transcription_task: nil, graph_task: nil, graph: nil)
+     |> assign(
+       transcription: nil,
+       transcription_task: nil,
+       graph_task: nil,
+       graph: nil,
+       notification: nil
+     )
      |> allow_upload(:audio, accept: :any, progress: &handle_progress/3, auto_upload: true)}
   end
 
@@ -27,7 +33,7 @@ defmodule KnowitWeb.InterviewLive do
   def handle_event("text_input", input, socket) do
     if String.length(input) > 0 do
       Logger.warn(input)
-      graph_task = Task.async(fn -> Knowit.Serving.OpenAI.extract_knowledge_graph(input) end)
+      graph_task = extractTriples(input)
       {:noreply, assign(socket, graph_task: graph_task)}
     else
       {:noreply, socket}
@@ -78,11 +84,25 @@ defmodule KnowitWeb.InterviewLive do
   def handle_info(%{topic: @topic, event: "msg", payload: msg}, socket) do
     if String.length(msg.content) > 0 do
       Logger.warn("extracting triples from #{msg.author.username}: #{msg.content}")
-      graph_task = Task.async(fn -> Knowit.Serving.OpenAI.extract_knowledge_graph(msg.content) end)
+      graph_task = extractTriples(msg.content)
       {:noreply, assign(socket, graph_task: graph_task)}
     else
       {:noreply, socket}
     end
+  end
+
+  @impl true
+  def handle_info({:DOWN, ref, :process, _pid, {%Jason.DecodeError{data: reason}, _}}, socket)
+      when socket.assigns.graph_task.ref == ref do
+    IO.inspect(reason)
+    send(self(), :schedule_clear_flash)
+    {:noreply, assign(socket, notification: reason)}
+  end
+
+  @impl true
+  def handle_info(:schedule_clear_flash, socket) do
+    :timer.sleep(5000)
+    {:noreply, assign(socket, notification: nil)}
   end
 
   @impl true
@@ -103,5 +123,17 @@ defmodule KnowitWeb.InterviewLive do
       nodes: nodes,
       edges: edges
     }
+  end
+
+  def extractTriples(text) do
+    options = [restart: :transient, max_restarts: 2]
+
+    Task.Supervisor.async_nolink(
+      Knowit.TaskSupervisor,
+      fn ->
+        Knowit.Serving.OpenAI.extract_knowledge_graph(text)
+      end,
+      options
+    )
   end
 end
