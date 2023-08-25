@@ -73,7 +73,8 @@ if config_env() == :prod do
 
   config :openai, [
     # find it at https://platform.openai.com/account/api-keys
-    api_key: Utils.get_env_or_fail("OPENAI_TOKEN")
+    api_key: Utils.get_env_or_fail("OPENAI_TOKEN"),
+    http_options: [recv_timeout: 1 * 60 * 1000]
   ]
 
   config :nostrum,
@@ -138,7 +139,9 @@ else
   # ====================================================
   #                 non-prod configs
   # ====================================================
-  config :openai, api_key: System.get_env("OPENAI_TOKEN")
+  config :openai,
+    api_key: System.get_env("OPENAI_TOKEN"),
+    http_options: [recv_timeout: 1 * 60 * 1000]
 
   config :nostrum, [
     token: System.get_env("DISCORD_BOT_TOKEN"),
