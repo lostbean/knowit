@@ -1,31 +1,18 @@
-<div id="interview" class="flex flex-col items-center justify-center antialiased h-96 w-full">
-  <div id="graph" phx-update="ignore" class="h-5/6 w-full border-solid border-zinc-50">
-    <div id="cy" phx-hook="graph" class="w-full h-full"></div>
+<div id="interview" class="flex flex-col items-center justify-center antialiased h-full w-full">
+  <div id="graph" phx-update="ignore">
+    <div id="cy" phx-hook="graph" class="h-[calc(100vh-16rem)] w-[calc(100vw-5rem)]"></div>
   </div>
 
-  <div id="capture" class="h-auto w-full flex flex-row select-none">
-    <div id="audio-capture" class="h-auto w-auto mt-10">
+  <div id="capture" class="h-40 w-full flex flex-row select-none">
+    <div id="audio-capture" class=" mt-10">
       <button
         type="button"
         id="microphone"
         phx-hook="microphone"
         data-endianness={System.endianness()}
-        class="m-5 h-16 w-16 p-5 text-white bg-blue-700 rounded-full text-sm hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 active:bg-red-400 group"
+        class="h-16 w-16 m-5 p-5 btn-primary rounded-full active:bg-red-600"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke-width="1.5"
-          stroke="currentColor"
-          class="w-6 h-6"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z"
-          />
-        </svg>
+        <img src="/images/mic.svg" />
       </button>
 
       <form phx-change="noop" phx-submit="noop" class="hidden">
@@ -40,7 +27,7 @@
       >
         Tell me more about you?
       </label>
-      
+
       <%= if @notification do %>
         <div
           id="notification"
@@ -62,20 +49,12 @@
               else: "I'm listening... Type or just press and hold the mic to answer the question."
           }
         ><%= @transcription || "" %></textarea>
-        <div>
-          <svg
-            id="send"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 48 48"
-            height="20px"
-            width="20px"
-            stroke="none"
-            phx-hook="send_text"
-            class="relative bottom-10 left-4 fill-gray-800 dark:fill-white"
-          >
-            <path d="M4.02 42l41.98-18-41.98-18-.02 14 30 4-30 4z" />
-            <path d="M0 0h48v48h-48z" fill="none" />
-          </svg>
+        <div
+          id="send"
+          class="relative bottom-10 left-4 fill-gray-100 dark:fill-white"
+          phx-hook="send_text"
+        >
+          <img src="/images/send.svg" />
         </div>
       </div>
     </div>
