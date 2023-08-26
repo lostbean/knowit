@@ -1,0 +1,29 @@
+defmodule Knowit.DB do
+  import Ecto.Query
+  alias Ecto.Changeset
+  alias Knowit.Accounts.User
+  alias Knowit.Repo
+  alias Knowit.DB.{ExperimentSet, Experiment}
+
+  def insert_triple([origin, link, target], %ExperimentSet{} = experiment_set) do
+    %Experiment{origin: origin, link: link, target: target}
+    |> Experiment.changeset()
+    |> Changeset.put_assoc(:experiment_set, experiment_set)
+    |> Repo.insert()
+  end
+
+  def new_experiment_set(name, %User{} = user) do
+    %ExperimentSet{name: name}
+    |> ExperimentSet.changeset()
+    |> Changeset.put_assoc(:user, user)
+    |> Repo.insert()
+  end
+
+  def list_experiment_sets() do
+    query =
+      from e in ExperimentSet,
+        order_by: [desc: e.updated_at],
+        preload: :user
+    Repo.all(query)
+  end
+end

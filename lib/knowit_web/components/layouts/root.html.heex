@@ -14,7 +14,7 @@
   <body class="flex flex-col items-center h-screen w-screen bg-white antialiased">
     <header>
       <div class="h-18 px-4 w-screen flex flex-wrap justify-between items-center mx-auto max-w-screen-xl">
-        <div class="flex items-center justify-between border-b border-zinc-100 py-3 text-md">
+        <div class="flex items-center justify-between py-3 text-md">
           <div class="flex items-center gap-4">
             <a href="/" class="items-center bg-brand/5 text-brand rounded-full px-2 font-medium leading-6">
               KnowIt
@@ -27,23 +27,23 @@
               <%= @current_user.email %>
             </li>
             <li>
-              <.link href={~p"/users/settings"} class="btn-login">
+              <.link href={~p"/users/settings"} class="btn-primary">
                 Settings
               </.link>
             </li>
             <li>
-              <.link href={~p"/users/log_out"} method="delete" class="btn-login">
+              <.link href={~p"/users/log_out"} method="delete" class="btn-primary">
                 Log out
               </.link>
             </li>
           <% else %>
             <li>
-              <.link href={~p"/users/register"} class="btn-login">
+              <.link href={~p"/users/register"} class="btn-primary">
                 Register
               </.link>
             </li>
             <li>
-              <.link href={~p"/users/log_in"} class="btn-login">
+              <.link href={~p"/users/log_in"} class="btn-primary">
                 Log in
               </.link>
             </li>

@@ -1,67 +1,77 @@
-<div id="interview" class="flex flex-col items-center justify-center antialiased h-full w-full">
-  <div id="graph" phx-update="ignore">
-    <div id="cy" phx-hook="graph" class="h-[calc(100vh-16rem)] w-[calc(100vw-5rem)]"></div>
+<div id="app" class="flex flex-row">
+  <div id="sets" class="w-1/6 flex flex-col place-items-center">
+    <button type="button" id="new_set" class="h-14 w-14 m-3 p-3 btn-primary rounded-full">
+      +
+    </button>
+    <ul>
+      <li :for={experiment_set <- @experiment_sets}>
+        <.live_card experiment_set={experiment_set}></.live_card>
+      </li>
+    </ul>
   </div>
 
-  <div id="capture" class="h-40 w-full flex flex-row select-none">
-    <div id="audio-capture" class=" mt-10">
-      <button
-        type="button"
-        id="microphone"
-        phx-hook="microphone"
-        data-endianness={System.endianness()}
-        class="h-16 w-16 m-5 p-5 btn-primary rounded-full active:bg-red-600"
-      >
-        <img src="/images/mic.svg" />
-      </button>
-
-      <form phx-change="noop" phx-submit="noop" class="hidden">
-        <.live_file_input upload={@uploads.audio} />
-      </form>
+  <div id="interview" class="flex flex-col items-center justify-center antialiased h-full w-full">
+    <div id="graph" phx-update="ignore">
+      <div id="cy" phx-hook="graph" class="h-[calc(100vh-16rem)] w-[calc(100vw-20rem)]"></div>
     </div>
 
-    <div id="transcription-output" class="flex flex-col w-full h-auto">
-      <label
-        for="text_input"
-        class="h-8 block mb-2 text-sm font-medium text-gray-900 dark:text-black"
-      >
-        Tell me more about you?
-      </label>
-
-      <%= if @notification do %>
-        <div
-          id="notification"
-          class="fixed top-20 animate-pulse right-0 text-sm bg-orange-100 border-l-4 border-orange-500 text-orange-700 p-4 m-2"
-          role="alert"
+    <div id="capture" class="h-40 w-full flex flex-row select-none">
+      <div id="audio-capture" class=" mt-10">
+        <button
+          type="button"
+          id="microphone"
+          phx-hook="microphone"
+          data-endianness={System.endianness()}
+          class="h-16 w-16 m-5 p-5 btn-primary rounded-full active:bg-red-600"
         >
-          <%= @notification || "" %>
-        </div>
-      <% end %>
+          <img src="/images/mic.svg" />
+        </button>
 
-      <div id="text" class="h-20">
-        <textarea
-          id="text_input"
-          rows="4"
-          class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-          placeholder={
-            if @transcription_task,
-              do: "Hang in there. Processing...",
-              else: "I'm listening... Type or just press and hold the mic to answer the question."
-          }
-        ><%= @transcription || "" %></textarea>
-        <div
-          id="send"
-          class="relative bottom-10 left-4"
-          phx-hook="send_text"
+        <form phx-change="noop" phx-submit="noop" class="hidden">
+          <.live_file_input upload={@uploads.audio} />
+        </form>
+      </div>
+
+      <div id="transcription-output" class="flex flex-col w-full h-auto">
+        <label
+          for="text_input"
+          class="h-8 block mb-2 text-sm font-medium text-gray-900 dark:text-black"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 48 48"
-            stroke="none"
-            class="h-6 w-6 fill-orange-300 hover:fill-orange-500"
+          Tell me more about you?
+        </label>
+
+        <%= if @notification do %>
+          <div
+            id="notification"
+            class="fixed top-20 animate-pulse right-0 text-sm bg-orange-100 border-l-4 border-orange-500 text-orange-700 p-4 m-2"
+            role="alert"
           >
-            <path d="M4.02 42l41.98-18-41.98-18-.02 14 30 4-30 4z" />
-          </svg>
+            <%= @notification || "" %>
+          </div>
+        <% end %>
+
+        <div id="text" class="h-20">
+          <textarea
+            id="text_input"
+            rows="4"
+            class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            placeholder={
+              if @transcription_task,
+                do: "Hang in there. Processing...",
+                else:
+                  "I'm listening... Type or just press and hold the mic to answer the question."
+            }
+          ><%= @transcription || "" %></textarea>
+          <div id="send" class="relative bottom-10 left-4" phx-hook="send_text">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 48 48"
+              stroke="none"
+              class="h-6 w-6 fill-orange-300 hover:fill-orange-500"
+            >
+              <path d="M4.02 42l41.98-18-41.98-18-.02 14 30 4-30 4z" />
+            </svg>
+          </div>
         </div>
       </div>
     </div>

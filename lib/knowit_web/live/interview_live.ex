@@ -16,7 +16,8 @@ defmodule KnowitWeb.InterviewLive do
        transcription_task: nil,
        graph_task: nil,
        graph: nil,
-       notification: nil
+       notification: nil,
+       experiment_sets: Knowit.DB.list_experiment_sets()
      )
      |> allow_upload(:audio, accept: :any, progress: &handle_progress/3, auto_upload: true)}
   end
@@ -136,4 +137,16 @@ defmodule KnowitWeb.InterviewLive do
       options
     )
   end
+
+  defp live_card(assigns) do
+    ~H"""
+    <div class="card block m-2 p-2 btn-primary">
+      <div class="card-content">
+        <h5><%= @experiment_set.name %></h5>
+        <p class="text-xs"><%= @experiment_set.updated_at %></p>
+      </div>
+    </div>
+    """
+  end
+
 end
