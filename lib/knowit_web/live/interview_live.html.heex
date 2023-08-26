@@ -31,7 +31,7 @@
       <%= if @notification do %>
         <div
           id="notification"
-          class="text-sm bg-orange-100 border-l-4 border-orange-500 text-orange-700 p-4 m-2"
+          class="fixed top-20 animate-pulse right-0 text-sm bg-orange-100 border-l-4 border-orange-500 text-orange-700 p-4 m-2"
           role="alert"
         >
           <%= @notification || "" %>
@@ -51,10 +51,17 @@
         ><%= @transcription || "" %></textarea>
         <div
           id="send"
-          class="relative bottom-10 left-4 fill-gray-100 dark:fill-white"
+          class="relative bottom-10 left-4"
           phx-hook="send_text"
         >
-          <img src="/images/send.svg" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 48 48"
+            stroke="none"
+            class="h-6 w-6 fill-orange-300 hover:fill-orange-500"
+          >
+            <path d="M4.02 42l41.98-18-41.98-18-.02 14 30 4-30 4z" />
+          </svg>
         </div>
       </div>
     </div>
