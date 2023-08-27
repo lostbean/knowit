@@ -5,7 +5,10 @@
     </button>
     <ul>
       <li :for={experiment_set <- @experiment_sets}>
-        <.live_card experiment_set={experiment_set}></.live_card>
+        <.live_card
+          experiment_set={experiment_set}
+          selected={@selected_set_id && (experiment_set.id == String.to_integer(@selected_set_id))}
+        ></.live_card>
       </li>
     </ul>
   </div>

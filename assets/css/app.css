@@ -7,9 +7,16 @@
   .btn-color {
     @apply bg-orange-300 text-black border-white hover:text-white hover:border-transparent hover:bg-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-opacity-75;
   }
+  
+  .btn-color-selected {
+    @apply bg-orange-500 text-white border-transparent hover:border-white focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-opacity-75;
+  }
 
   .btn-primary {
     @apply inline-block text-sm px-4 py-2 leading-none border rounded mt-4 lg:mt-0 btn-color;
   }
 
+  .btn-primary-selected {
+    @apply inline-block text-sm px-4 py-2 leading-none border rounded mt-4 lg:mt-0 btn-color-selected;
+  }
 }

@@ -20,7 +20,8 @@ defmodule KnowitWeb.InterviewLive do
        transcription_task: nil,
        graph_task: nil,
        graph: nil,
-       notification: nil
+       notification: nil,
+       selected_set_id: nil
      )
      |> allow_upload(:audio, accept: :any, progress: &handle_progress/3, auto_upload: true)}
   end
@@ -47,6 +48,11 @@ defmodule KnowitWeb.InterviewLive do
     else
       {:noreply, socket}
     end
+  end
+
+  def handle_event("select_set", %{"set-id" => set_id}, socket) do
+    IO.inspect(set_id)
+    {:noreply, assign(socket, selected_set_id: set_id)}
   end
 
   defp handle_progress(:audio, entry, socket) when entry.done? do
@@ -148,9 +154,19 @@ defmodule KnowitWeb.InterviewLive do
 
   defp live_card(assigns) do
     ~H"""
-    <div class="card block m-2 p-2 btn-primary">
+    <div
+      class={
+        if @selected,
+          do: "card block m-2 p-2 btn-primary-selected",
+          else: "card block m-2 p-2 btn-primary"}
+      phx-click={
+        if @selected,
+          do: "noop",
+          else: "select_set"}
+      phx-value-set-id={@experiment_set.id}
+    >
       <div class="card-content">
-        <h5><%= @experiment_set.name %></h5>
+        <p class="text-sm font-semibold"><%= @experiment_set.name %></p>
         <p class="text-xs"><%= @experiment_set.updated_at %></p>
       </div>
     </div>
