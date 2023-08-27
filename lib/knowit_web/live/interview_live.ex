@@ -9,13 +9,13 @@ defmodule KnowitWeb.InterviewLive do
   @impl true
   def mount(_params, %{"user_token" => user_token} = _session, socket) do
     user = Accounts.get_user_by_session_token(user_token)
-    sets = Knowit.DB.list_experiment_sets(user)
     DiscordBot.subscribe()
+    send(self(), :list_experiment_sets)
 
     {:ok,
      assign(socket,
        current_user: user,
-       experiment_sets: sets,
+       experiment_sets: [],
        transcription: nil,
        transcription_task: nil,
        graph_task: nil,
@@ -53,6 +53,12 @@ defmodule KnowitWeb.InterviewLive do
   def handle_event("select_set", %{"set-id" => set_id}, socket) do
     IO.inspect(set_id)
     {:noreply, assign(socket, selected_set_id: set_id)}
+  end
+
+  def handle_event("add_new_set", _input, socket) do
+    Knowit.DB.new_experiment_set("new knowledge", socket.assigns.current_user)
+    send(self(), :list_experiment_sets)
+    {:noreply, socket}
   end
 
   defp handle_progress(:audio, entry, socket) when entry.done? do
@@ -118,6 +124,12 @@ defmodule KnowitWeb.InterviewLive do
   def handle_info(:schedule_clear_flash, socket) do
     :timer.sleep(5000)
     {:noreply, assign(socket, notification: nil)}
+  end
+
+  @impl true
+  def handle_info(:list_experiment_sets, socket) do
+    sets = Knowit.DB.list_experiment_sets(socket.assigns.current_user)
+    {:noreply, assign(socket, experiment_sets: sets)}
   end
 
   @impl true

@@ -1,8 +1,11 @@
 <div id="app" class="flex flex-row">
   <div id="sets" class="w-1/6 flex flex-col place-items-center">
-    <button type="button" id="new_set" class="h-14 w-14 m-3 p-3 btn-primary rounded-full">
-      +
-    </button>
+    <button
+      type="button"
+      id="new_set" 
+      phx-click="add_new_set"
+      class="h-14 w-14 m-3 p-3 btn-primary rounded-full"
+    >+</button>
     <ul>
       <li :for={experiment_set <- @experiment_sets}>
         <.live_card
