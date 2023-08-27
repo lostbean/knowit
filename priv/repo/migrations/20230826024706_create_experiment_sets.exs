@@ -7,7 +7,5 @@ defmodule Knowit.Repo.Migrations.CreateExperimentSets do
       add :name, :string
       timestamps()
     end
-
-    create unique_index(:experiment_sets, [:user_id, :name])
   end
 end
