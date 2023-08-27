@@ -2,24 +2,32 @@ defmodule KnowitWeb.InterviewLive do
   use KnowitWeb, :live_view
   require Logger
   alias Knowit.Serving.DiscordBot
+  alias Knowit.Accounts
 
   @topic inspect(DiscordBot)
 
   @impl true
-  def mount(_params, _session, socket) do
+  def mount(_params, %{"user_token" => user_token} = _session, socket) do
+    user = Accounts.get_user_by_session_token(user_token)
+    sets = Knowit.DB.list_experiment_sets(user)
     DiscordBot.subscribe()
 
     {:ok,
-     socket
-     |> assign(
+     assign(socket,
+       current_user: user,
+       experiment_sets: sets,
        transcription: nil,
        transcription_task: nil,
        graph_task: nil,
        graph: nil,
-       notification: nil,
-       experiment_sets: Knowit.DB.list_experiment_sets()
+       notification: nil
      )
      |> allow_upload(:audio, accept: :any, progress: &handle_progress/3, auto_upload: true)}
+  end
+
+  @impl true
+  def mount(_params, _session, socket) do
+    redirect(socket, to: "/users/log_in")
   end
 
   @impl true
@@ -148,5 +156,4 @@ defmodule KnowitWeb.InterviewLive do
     </div>
     """
   end
-
 end

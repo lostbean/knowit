@@ -19,9 +19,10 @@ defmodule Knowit.DB do
     |> Repo.insert()
   end
 
-  def list_experiment_sets() do
+  def list_experiment_sets(user) do
     query =
       from e in ExperimentSet,
+        where: e.user_id == ^user.id,
         order_by: [desc: e.updated_at],
         preload: :user
     Repo.all(query)
