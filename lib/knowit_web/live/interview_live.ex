@@ -61,6 +61,17 @@ defmodule KnowitWeb.InterviewLive do
     {:noreply, socket}
   end
 
+  def handle_event("rename_experiment_set", %{"rename_set_id" => set_id, "rename_to" => text}, socket) do
+    Knowit.DB.rename_experiment_set(text, socket.assigns.current_user, set_id)
+    send(self(), :list_experiment_sets)
+    {:noreply, socket}
+  end
+
+  def handle_event(event, _input, socket) do
+    Logger.warn("UNHANDLED EVENT: #{event}")
+    {:noreply, socket}
+  end
+
   defp handle_progress(:audio, entry, socket) when entry.done? do
     binary =
       consume_uploaded_entry(socket, entry, fn %{path: path} ->
@@ -178,7 +189,13 @@ defmodule KnowitWeb.InterviewLive do
       phx-value-set-id={@experiment_set.id}
     >
       <div class="card-content">
-        <p class="text-sm font-semibold"><%= @experiment_set.name %></p>
+        <p
+          id={"experiment_set_name_#{@experiment_set.id}"}
+          class="w-fit"
+          phx-hook="auto_submit"
+          value-rename-set-id={@experiment_set.id}
+          value-original={@experiment_set.name}
+          contenteditable="true"><%= @experiment_set.name %></p>
         <p class="text-xs"><%= @experiment_set.updated_at %></p>
       </div>
     </div>

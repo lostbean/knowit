@@ -19,6 +19,12 @@ defmodule Knowit.DB do
     |> Repo.insert()
   end
 
+  def rename_experiment_set(new_name, %User{} = user, set_id) do
+    Repo.get_by(ExperimentSet, id: set_id)
+    |> Changeset.change(%{name: new_name})
+    |> Repo.update()
+  end
+
   def list_experiment_sets(user) do
     query =
       from e in ExperimentSet,

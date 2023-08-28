@@ -24,12 +24,14 @@ import topbar from "../vendor/topbar"
 import { Graph } from "./graph" 
 import { Microphone } from "./mic" 
 import { SendText } from "./send_text" 
+import { AutoSubmit } from "./auto_submit" 
 
 let hooks = {};
 
 hooks.graph = Graph;
 hooks.microphone = Microphone;
 hooks.send_text = SendText;
+hooks.auto_submit = AutoSubmit;
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, { params: { _csrf_token: csrfToken }, hooks })
