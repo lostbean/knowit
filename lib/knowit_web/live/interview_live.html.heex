@@ -7,7 +7,7 @@
       class="h-14 w-14 m-3 p-3 btn-primary rounded-full"
     >+</button>
     <ul>
-      <li :for={experiment_set <- @experiment_sets}>
+      <li :for={experiment_set <- @experiment_sets} class="flex flex-row">
         <.live_card
           experiment_set={experiment_set}
           selected={@selected_set_id && (experiment_set.id == String.to_integer(@selected_set_id))}

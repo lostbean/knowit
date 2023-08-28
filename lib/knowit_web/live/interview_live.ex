@@ -1,5 +1,4 @@
 defmodule KnowitWeb.InterviewLive do
-  alias ElixirSense.Log
   alias Knowit.DB
   use KnowitWeb, :live_view
   require Logger
@@ -63,12 +62,20 @@ defmodule KnowitWeb.InterviewLive do
   def handle_event("add_new_set", _input, socket) do
     Knowit.DB.new_experiment_set("new knowledge", socket.assigns.current_user)
     send(self(), :list_experiment_sets)
+    send(self(), :select_latest_set)
     {:noreply, socket}
   end
 
   def handle_event("rename_experiment_set", %{"rename_set_id" => set_id, "rename_to" => text}, socket) do
     Knowit.DB.rename_experiment_set(text, socket.assigns.current_user, set_id)
     send(self(), :list_experiment_sets)
+    {:noreply, socket}
+  end
+
+  def handle_event("delete_experiment_set", %{"value" => set_id}, socket) do
+    Knowit.DB.delete_experiment_set(socket.assigns.current_user, set_id)
+    send(self(), :list_experiment_sets)
+    send(self(), :select_latest_set)
     {:noreply, socket}
   end
 
@@ -146,6 +153,12 @@ defmodule KnowitWeb.InterviewLive do
   end
 
   @impl true
+  def handle_info(:select_latest_set, socket) do
+    lastest_set = DB.latest_updated_experiment_set(socket.assigns.current_user)
+    {:noreply, assign(socket, selected_set_id: (if lastest_set, do: "#{lastest_set.id}", else: nil))}
+  end
+
+  @impl true
   def handle_info(:list_experiment_sets, socket) do
     sets = Knowit.DB.list_experiment_sets(socket.assigns.current_user)
     {:noreply, assign(socket, experiment_sets: sets)}
@@ -198,11 +211,16 @@ defmodule KnowitWeb.InterviewLive do
 
   defp live_card(assigns) do
     ~H"""
+    <button
+      class="card block align-middle text-align-center translate-x-6"
+      phx-click="delete_experiment_set"
+      value={@experiment_set.id}
+    ><img src="/images/trashcan.svg" class="w-4 h-5"/></button>
     <div
       class={
         if @selected,
-          do: "card block m-2 p-2 btn-primary-selected",
-          else: "card block m-2 p-2 btn-primary"}
+          do: "card block m-2 p-2 btn-primary-selected translate-x-6 duration-300",
+          else: "card block m-2 p-2 btn-primary z-0"}
       phx-click={
         if @selected,
           do: "noop",

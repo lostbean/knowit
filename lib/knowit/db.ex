@@ -24,9 +24,16 @@ defmodule Knowit.DB do
   end
 
   def rename_experiment_set(new_name, %User{} = user, set_id) do
-    Repo.get_by(ExperimentSet, id: set_id)
+    Repo.get_by(ExperimentSet, id: set_id, user_id: user.id)
     |> Changeset.change(%{name: new_name})
     |> Repo.update()
+  end
+
+  def delete_experiment_set(%User{} = user, set_id) do
+    from(s in ExperimentSet,
+      where: s.id == ^set_id,
+      where: s.user_id == ^user.id,
+      select: s) |> Repo.delete_all()
   end
 
   def list_experiment_sets(user) do
@@ -36,6 +43,16 @@ defmodule Knowit.DB do
         order_by: [desc: e.updated_at],
         preload: :user
     Repo.all(query)
+  end
+
+  def latest_updated_experiment_set(user) do
+    query =
+      from e in ExperimentSet,
+        where: e.user_id == ^user.id,
+        order_by: [desc: e.updated_at],
+        limit: 1,
+        preload: :user
+    Repo.one(query)
   end
 
   def list_experiment(user, set_id) do
