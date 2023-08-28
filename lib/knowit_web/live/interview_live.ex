@@ -1,4 +1,6 @@
 defmodule KnowitWeb.InterviewLive do
+  alias ElixirSense.Log
+  alias Knowit.DB
   use KnowitWeb, :live_view
   require Logger
   alias Knowit.Serving.DiscordBot
@@ -51,8 +53,11 @@ defmodule KnowitWeb.InterviewLive do
   end
 
   def handle_event("select_set", %{"set-id" => set_id}, socket) do
-    IO.inspect(set_id)
-    {:noreply, assign(socket, selected_set_id: set_id)}
+    graph = DB.list_experiment(socket.assigns.current_user, set_id)
+    triples = Enum.map(graph, fn %DB.Experiment{:origin => origin, :link => link, :target => target} -> [origin, link, target] end)
+    {:noreply,
+      assign(socket, selected_set_id: set_id)
+      |> push_event("reset_points", %{points: genCytoscapeData(triples)})}
   end
 
   def handle_event("add_new_set", _input, socket) do
@@ -100,8 +105,11 @@ defmodule KnowitWeb.InterviewLive do
   @impl true
   def handle_info({ref, result}, socket) when socket.assigns.graph_task.ref == ref do
     Process.demonitor(ref, [:flush])
+
     triples_text = result |> Enum.map(&Enum.join(&1, " <> "))
     Logger.warn("graph:\n#{triples_text |> Enum.join("\n")}")
+
+    saveTriples(result, socket.assigns.current_user, socket.assigns.selected_set_id)
 
     {:noreply,
      assign(
@@ -161,6 +169,19 @@ defmodule KnowitWeb.InterviewLive do
       nodes: nodes,
       edges: edges
     }
+  end
+
+  def saveTriples(triples, user, set_id) do
+    options = [restart: :transient, max_restarts: 2]
+
+    Task.Supervisor.async_nolink(
+      Knowit.TaskSupervisor,
+      fn ->
+        set = DB.get_experiment_set(user, set_id)
+        triples |> Enum.map(&(DB.insert_triple(&1, set)))
+      end,
+      options
+    )
   end
 
   def extractTriples(text) do

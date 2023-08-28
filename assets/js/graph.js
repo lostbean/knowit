@@ -77,10 +77,27 @@ export const Graph = {
 
         setupDragAndDrop(cy);
 
+        const cose_layout = {
+            nodeOverlap: 5,
+            componentSpacing: 80,
+            padding: 50,
+            name: 'cose',
+            fit: true
+        };
+
+
         this.handleEvent("add_points", ({ points }) => {
             console.log(points);
             cy.add(points);
-            cy.layout({ name: 'random', fit: true}).run();
+            cy.layout(cose_layout).run();
+            cy.fit();
+        });
+        
+        this.handleEvent("reset_points", ({ points }) => {
+            cy.remove('*');
+            console.log(points);
+            cy.add(points);
+            cy.layout(cose_layout).run();
             cy.fit();
         });
 
