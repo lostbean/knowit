@@ -33,35 +33,41 @@ defmodule Knowit.DB do
     from(s in ExperimentSet,
       where: s.id == ^set_id,
       where: s.user_id == ^user.id,
-      select: s) |> Repo.delete_all()
+      select: s
+    )
+    |> Repo.delete_all()
   end
 
   def list_experiment_sets(user) do
-    query =
-      from e in ExperimentSet,
-        where: e.user_id == ^user.id,
-        order_by: [desc: e.updated_at],
-        preload: :user
-    Repo.all(query)
+    from(e in ExperimentSet,
+      where: e.user_id == ^user.id,
+      order_by: [desc: e.updated_at],
+      preload: :user
+    )
+    |> Repo.all()
   end
 
   def latest_updated_experiment_set(user) do
-    query =
-      from e in ExperimentSet,
-        where: e.user_id == ^user.id,
-        order_by: [desc: e.updated_at],
-        limit: 1,
-        preload: :user
-    Repo.one(query)
+    from(e in ExperimentSet,
+      where: e.user_id == ^user.id,
+      order_by: [desc: e.updated_at],
+      limit: 1,
+      preload: :user
+    )
+    |> Repo.one()
   end
 
   def list_experiment(user, set_id) do
-    query =
-      from e in Experiment,
+    if is_nil(set_id) do
+      []
+    else
+      from(e in Experiment,
         join: s in ExperimentSet,
         on: s.id == e.experiment_set_id,
         where: s.id == ^set_id,
         preload: []
-    Repo.all(query)
+      )
+      |> Repo.all()
+    end
   end
 end
