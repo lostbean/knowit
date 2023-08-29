@@ -9,7 +9,7 @@ defmodule KnowitWeb.WaWebhookController do
       |> Conn.send_resp(:ok, "")
   end
 
-  def link_hook(conn, %{ " hub.challenge" => challenge, " hub.mode" => "subscribe", " hub.verify_token" => token}) do
+  def link_hook(conn, %{ "hub.challenge" => challenge, "hub.mode" => "subscribe", "hub.verify_token" => token}) do
     Logger.warn(token)
     Logger.warn(challenge)
     conn
