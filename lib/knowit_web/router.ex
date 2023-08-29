@@ -31,6 +31,11 @@ defmodule KnowitWeb.Router do
     get "/callback", OAuthController, :callback
   end
 
+  scope "/wa", KnowitWeb do
+    post "/webhook", WaWebhookController, :hook
+  end
+
+
   # Other scopes may use custom stacks.
   # scope "/api", KnowitWeb do
   #   pipe_through :api
