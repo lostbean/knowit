@@ -8,4 +8,11 @@ defmodule KnowitWeb.WaWebhookController do
     conn
       |> Conn.send_resp(:ok, "")
   end
+
+  def link_hook(conn, params) do
+    Logger.warn(params)
+    conn
+      |> Conn.send_resp(:ok, "")
+  end
+
 end
