@@ -32,8 +32,8 @@ defmodule KnowitWeb.Router do
   end
 
   scope "/wa", KnowitWeb do
-    get "/webhook", WaWebhookController, :hook
-    post "/webhook", WaWebhookController, :link_hook
+    get "/webhook", WaWebhookController, :link_hook
+    post "/webhook", WaWebhookController, :hook
   end
 
 
