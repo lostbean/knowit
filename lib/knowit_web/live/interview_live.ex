@@ -52,11 +52,7 @@ defmodule KnowitWeb.InterviewLive do
   end
 
   def handle_event("select_set", %{"set-id" => set_id}, socket) do
-    graph = DB.list_experiment(socket.assigns.current_user, set_id)
-    triples = Enum.map(graph, fn %DB.Experiment{:origin => origin, :link => link, :target => target} -> [origin, link, target] end)
-    {:noreply,
-      assign(socket, selected_set_id: set_id)
-      |> push_event("reset_points", %{points: genCytoscapeData(triples)})}
+    {:noreply, assign_selected_set_id_to_socket(socket, set_id)}
   end
 
   def handle_event("add_new_set", _input, socket) do
@@ -155,7 +151,8 @@ defmodule KnowitWeb.InterviewLive do
   @impl true
   def handle_info(:select_latest_set, socket) do
     lastest_set = DB.latest_updated_experiment_set(socket.assigns.current_user)
-    {:noreply, assign(socket, selected_set_id: (if lastest_set, do: "#{lastest_set.id}", else: nil))}
+    set_id_str = if lastest_set, do: "#{lastest_set.id}", else: nil
+    {:noreply, assign_selected_set_id_to_socket(socket, set_id_str)}
   end
 
   @impl true
@@ -182,6 +179,14 @@ defmodule KnowitWeb.InterviewLive do
       nodes: nodes,
       edges: edges
     }
+  end
+
+  def assign_selected_set_id_to_socket(socket, set_id) do
+    graph = DB.list_experiment(socket.assigns.current_user, set_id)
+    triples = Enum.map(graph, fn %DB.Experiment{:origin => origin, :link => link, :target => target} -> [origin, link, target] end)
+    socket
+      |> assign(selected_set_id: set_id)
+      |> push_event("reset_points", %{points: genCytoscapeData(triples)})
   end
 
   def saveTriples(triples, user, set_id) do
