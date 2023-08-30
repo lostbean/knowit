@@ -15,7 +15,12 @@ defmodule Knowit.Serving.OpenAI do
           %{
             role: "system",
             content:
-              "You are a knowledge graph specialist. Your objective is to extract RDF triples from the text using properties and types defined in Schema.org . Make the output simple and only list the triples as JSON lists."
+              """
+              You are a knowledge graph specialist. Your objective \
+              is to extract RDF triples from the text using properties \
+              and types defined in Schema.org . Make the output simple \
+              and only list the triples as JSON lists.
+              """
           },
           # %{role: "assistant", content: "[[John, drives, Tesla], [Tesla, has color, green], [John, has grilfriend, Ana]]"},
           %{role: "user", content: content}
