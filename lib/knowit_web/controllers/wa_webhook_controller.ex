@@ -1,10 +1,11 @@
 defmodule KnowitWeb.WaWebhookController do
   use KnowitWeb, :controller
   alias Plug.Conn
+  alias Knowit.WaBot
   require Logger
 
   def hook(conn, params) do
-    Logger.warn(params)
+    WaBot.process_hooked_event(params)
     conn
       |> Conn.send_resp(:ok, "")
   end

@@ -3,14 +3,17 @@ defmodule KnowitWeb.InterviewLive do
   use KnowitWeb, :live_view
   require Logger
   alias Knowit.Serving.DiscordBot
+  alias Knowit.WaBot
   alias Knowit.Accounts
 
-  @topic inspect(DiscordBot)
+  @discord_topic inspect(DiscordBot)
+  @wa_topic inspect(WaBot)
 
   @impl true
   def mount(_params, %{"user_token" => user_token} = _session, socket) do
     user = Accounts.get_user_by_session_token(user_token)
     DiscordBot.subscribe()
+    WaBot.subscribe()
     send(self(), :list_experiment_sets)
 
     {:ok,
@@ -124,7 +127,18 @@ defmodule KnowitWeb.InterviewLive do
   end
 
   @impl true
-  def handle_info(%{topic: @topic, event: "msg", payload: msg}, socket) do
+  def handle_info(%{topic: @wa_topic, event: "msg", payload: payload}, socket) do
+    if String.length(payload.msg) > 0 do
+      Logger.warn("extracting triples from #{payload.from}: #{payload.msg}")
+      graph_task = extractTriples(payload.msg)
+      {:noreply, assign(socket, graph_task: graph_task)}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  @impl true
+  def handle_info(%{topic: @discord_topic, event: "msg", payload: msg}, socket) do
     if String.length(msg.content) > 0 do
       Logger.warn("extracting triples from #{msg.author.username}: #{msg.content}")
       graph_task = extractTriples(msg.content)
@@ -162,7 +176,8 @@ defmodule KnowitWeb.InterviewLive do
   end
 
   @impl true
-  def handle_info(_info, socket) do
+  def handle_info(info, socket) do
+    Logger.warn("UNHANDLED INFO", info)
     {:noreply, socket}
   end
 
