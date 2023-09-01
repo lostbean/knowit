@@ -9,13 +9,23 @@ Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
 
 Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
 
-## Init local DB
+## Init DB
+
+For local DB (need to install pgvector and age) use: 
 
 ```bash
 initdb -D .pg_data/knowit_dev
 pg_ctl -D .pg_data/knowit_dev -l logfile start
 createuser postgres
 createdb knowit_dev
+```
+
+Or use remote DB by setting URL using the env var `DATABASE_URL`.
+
+For Fly.IO, set proxy using
+
+```bash
+flyctl proxy 15432:5432 -a <db-app>
 ```
 
 Start server:
