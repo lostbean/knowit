@@ -65,6 +65,7 @@ defmodule Knowit.DB do
         join: s in ExperimentSet,
         on: s.id == e.experiment_set_id,
         where: s.id == ^set_id,
+        where: s.user_id == ^user.id,
         preload: []
       )
       |> Repo.all()
