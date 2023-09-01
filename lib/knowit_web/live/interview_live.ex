@@ -176,8 +176,8 @@ defmodule KnowitWeb.InterviewLive do
   end
 
   @impl true
-  def handle_info(info, socket) do
-    Logger.warn("UNHANDLED INFO", info)
+  def handle_info(_info, socket) do
+    Logger.warn("UNHANDLED INFO")
     {:noreply, socket}
   end
 
