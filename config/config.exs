@@ -10,6 +10,10 @@ import Config
 config :knowit,
   ecto_repos: [Knowit.Repo]
 
+# Load age extension on every connection
+config :knowit, Knowit.Repo,
+  after_connect: {Knowit.Repo, :set_graph_extension, []}
+
 # Configures the endpoint
 config :knowit, KnowitWeb.Endpoint,
   url: [host: "localhost"],
