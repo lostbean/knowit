@@ -3,14 +3,7 @@ defmodule Knowit.DB do
   alias Ecto.Changeset
   alias Knowit.Accounts.User
   alias Knowit.Repo
-  alias Knowit.DB.{ExperimentSet, Experiment}
-
-  def insert_triple([origin, link, target], %ExperimentSet{} = experiment_set) do
-    %Experiment{origin: origin, link: link, target: target}
-    |> Experiment.changeset()
-    |> Changeset.put_assoc(:experiment_set, experiment_set)
-    |> Repo.insert()
-  end
+  alias Knowit.DB.{ExperimentSet}
 
   def new_experiment_set(name, %User{} = user) do
     %ExperimentSet{name: name}
@@ -30,6 +23,7 @@ defmodule Knowit.DB do
   end
 
   def delete_experiment_set(%User{} = user, set_id) do
+    delete_graph_experiment_set(set_id)
     from(s in ExperimentSet,
       where: s.id == ^set_id,
       where: s.user_id == ^user.id,
@@ -57,18 +51,51 @@ defmodule Knowit.DB do
     |> Repo.one()
   end
 
+  def delete_graph_experiment_set(set_id) do
+    "SELECT * FROM cypher('knowit_graph', $$ MATCH (a {set_id:#{set_id}}) DETACH DELETE a $$) as (a agtype)"
+    |> Repo.query([])
+  end
+
+  def insert_triple([origin, link, target], %ExperimentSet{} = experiment_set) do
+    set_id = experiment_set.id
+    link_label = String.replace(link, ~r/[\W_]+/, "")
+
+    """
+    SELECT *
+    FROM cypher('knowit_graph', $$
+      MERGE (a:node {set_id:#{set_id}, value:'#{origin}'})
+      MERGE (b:node {set_id:#{set_id}, value:'#{target}'})
+      MERGE (a)-[:#{link_label} {set_id:#{set_id}, value:'#{link}'}]->(b)
+    $$) as (e agtype);
+    """
+    |> Repo.query([])
+  end
+
+  defmacro exists_frag() do
+    arguments = ["""
+    SELECT *
+    FROM cypher('knowit_graph', $$
+      MATCH (a)-[link]->(b)
+      RETURN a.value, link.value, b.value, a.set_id
+    $$) as (origin agtype, link agtype, target agtype, set_id agtype)
+    """]
+    quote do: fragment(unquote_splicing(arguments))
+  end
+
   def list_experiment(user, set_id) do
     if is_nil(set_id) do
       []
     else
-      from(e in Experiment,
+      from(e in exists_frag(),
         join: s in ExperimentSet,
-        on: s.id == e.experiment_set_id,
+        on: s.id == e.set_id,
         where: s.id == ^set_id,
         where: s.user_id == ^user.id,
+        select: [e.origin, e.link, e.target],
         preload: []
       )
       |> Repo.all()
+      |> Enum.map(&Enum.map(&1, fn {:ok, data} -> data end))
     end
   end
 end

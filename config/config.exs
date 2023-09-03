@@ -12,7 +12,8 @@ config :knowit,
 
 # Load age extension on every connection
 config :knowit, Knowit.Repo,
-  after_connect: {Knowit.Repo, :set_graph_extension, []}
+  after_connect: {Knowit.Repo, :set_graph_extension, []},
+  types: Knowit.Postgrex.PostgrexTypes
 
 # Configures the endpoint
 config :knowit, KnowitWeb.Endpoint,

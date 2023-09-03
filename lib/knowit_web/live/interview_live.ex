@@ -197,8 +197,7 @@ defmodule KnowitWeb.InterviewLive do
   end
 
   def assign_selected_set_id_to_socket(socket, set_id) do
-    graph = DB.list_experiment(socket.assigns.current_user, set_id)
-    triples = Enum.map(graph, fn %DB.Experiment{:origin => origin, :link => link, :target => target} -> [origin, link, target] end)
+    triples = DB.list_experiment(socket.assigns.current_user, set_id)
     socket
       |> assign(selected_set_id: set_id)
       |> push_event("reset_points", %{points: genCytoscapeData(triples)})
