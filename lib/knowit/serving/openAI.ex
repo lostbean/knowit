@@ -1,4 +1,5 @@
 defmodule Knowit.Serving.OpenAI do
+  require Logger
   # use Task
 
   # def start_link(arg) do
@@ -31,6 +32,12 @@ defmodule Knowit.Serving.OpenAI do
     |> Enum.flat_map(&String.split(&1, "\n"))
     |> Enum.join()
     |> Jason.decode!()
+    |> Enum.filter(&case &1 do
+      [_origin, _link, _target] -> true
+      x ->
+        Logger.warn("Invalid triple extraction: #{x}")
+        false
+    end)
   end
 
   def interview_questions() do
