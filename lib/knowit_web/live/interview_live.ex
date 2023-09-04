@@ -5,6 +5,7 @@ defmodule KnowitWeb.InterviewLive do
   alias Knowit.Serving.DiscordBot
   alias Knowit.WaBot
   alias Knowit.Accounts
+  alias Knowit.KnowitIndex
 
   @discord_topic inspect(DiscordBot)
   @wa_topic inspect(WaBot)
@@ -197,7 +198,7 @@ defmodule KnowitWeb.InterviewLive do
   end
 
   def assign_selected_set_id_to_socket(socket, set_id) do
-    triples = DB.list_experiment(socket.assigns.current_user, set_id)
+    triples = KnowitIndex.list_experiment(socket.assigns.current_user, set_id)
     socket
       |> assign(selected_set_id: set_id)
       |> push_event("reset_points", %{points: genCytoscapeData(triples)})
@@ -210,7 +211,7 @@ defmodule KnowitWeb.InterviewLive do
       Knowit.TaskSupervisor,
       fn ->
         set = DB.get_experiment_set(user, set_id)
-        triples |> Enum.map(&(DB.insert_triple(&1, set)))
+        triples |> Enum.map(&(KnowitIndex.insert_triple(&1, set)))
       end,
       options
     )
