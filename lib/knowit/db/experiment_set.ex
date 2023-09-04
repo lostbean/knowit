@@ -4,7 +4,6 @@ defmodule Knowit.DB.ExperimentSet do
 
   schema "experiment_sets" do
     belongs_to :user, Knowit.Accounts.User
-    has_many :experiments, Knowit.DB.Experiment
     field :name, :string
     timestamps()
   end
