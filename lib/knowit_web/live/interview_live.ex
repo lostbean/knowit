@@ -254,7 +254,11 @@ defmodule KnowitWeb.InterviewLive do
           phx-hook="auto_submit"
           value-rename-set-id={@experiment_set.id}
           value-original={@experiment_set.name}
-          contenteditable="true"><%= @experiment_set.name %></p>
+          contenteditable={
+            if @selected,
+              do: "true",
+              else: "false"}
+        ><%= @experiment_set.name %></p>
         <p class="text-xs"><%= @experiment_set.updated_at %></p>
       </div>
     </div>
