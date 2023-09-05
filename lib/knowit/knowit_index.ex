@@ -31,9 +31,11 @@ defmodule Knowit.KnowitIndex do
 
   def insert_triple([origin, link, target] = triple, %ExperimentSet{} = experiment_set) do
     [[origin_id, link_id, target_id] = triple_ids] = insert_into_graph(triple, experiment_set)
-    semanticIndex(origin, origin_id)
-    semanticIndex(link, link_id)
-    semanticIndex(target, target_id)
+    Task.await_many([
+      Task.async(fn -> semanticIndex(origin, origin_id) end),
+      Task.async(fn -> semanticIndex(link, link_id) end),
+      Task.async(fn -> semanticIndex(target, target_id) end)
+    ])
     triple_ids
   end
 
