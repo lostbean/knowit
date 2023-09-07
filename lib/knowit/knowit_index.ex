@@ -19,7 +19,7 @@ defmodule Knowit.KnowitIndex do
     """
 
     {:ok, %Postgrex.Result{:rows => rows}} = Repo.query(query_str, [])
-    Enum.map(rows, &Enum.map(&1, fn {:ok, data} -> data end))
+    rows
   end
 
   defp semanticIndex(text, obj_id) do
@@ -70,11 +70,10 @@ defmodule Knowit.KnowitIndex do
         preload: []
       )
       |> Repo.all()
-      |> Enum.map(&Enum.map(&1, fn {:ok, data} -> data end))
     end
   end
 
-  def semanticKeywordSearch(text) do
+  def searchSemanticRelevantGraphEntries(text) do
     %{embedding: %Nx.Tensor{} = embedding} =
       Nx.Serving.batched_run(Knowit.Serving.TextToVec, text)
 
@@ -86,17 +85,42 @@ defmodule Knowit.KnowitIndex do
     )
   end
 
-  def keywordSearch(text) do
+  def searchRelevantGraphEntries(hints) do
+    query_str = Enum.join(hints, " | ")
+
     from(
       f in SemanticIndex,
-      cross_join: q in fragment("plainto_tsquery('english', ?)", ^text),
+      cross_join: q in fragment("to_tsquery('english', ?)", ^query_str),
       where: fragment("to_tsvector('english', ?) @@ ?", f.content, q),
       order_by: [
         desc: fragment("ts_rank_cd(to_tsvector('english', ?), ?)", f.content, q)
       ],
       limit: 5,
-      select: %{content: f.content, graph_id: f.graph_id}
+      select: %{graph_id: f.graph_id}
     )
     |> Repo.all()
+  end
+
+  def findRelevantData(ids) do
+    id_list = Enum.join(ids, ",")
+
+    query_str = """
+    SELECT *
+    FROM cypher('knowit_graph', $$
+      MATCH path = (a:node)-[*]->(b:node)
+      WHERE id(a) in [#{id_list}] and id(b) in [#{id_list}]
+      RETURN a, b, COLLECT(DISTINCT path) AS paths
+    $$) as (a agtype, b agtype, path agtype);
+    """
+
+    {:ok, %Postgrex.Result{:rows => rows}} = Repo.query(query_str, [])
+    rows
+  end
+
+  def findRelatedDataFromKeywords(keywords) do
+    keywords
+    |> searchRelevantGraphEntries()
+    |> Enum.map(& &1.graph_id)
+    |> findRelevantData()
   end
 end

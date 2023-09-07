@@ -59,6 +59,7 @@ defmodule Knowit.MixProject do
       {:nostrum, "~> 0.8.0", runtime: Mix.env() != :CI},
       {:oauth2, ">= 0.0.0"},
       {:pgvector, "~> 0.2.0"},
+      {:decimal, "~> 2.0"}
     ]
   end
 

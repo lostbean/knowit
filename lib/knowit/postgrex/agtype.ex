@@ -32,12 +32,7 @@ defmodule Knowit.Postgrex.AgeType do
   end
 
   def binary_agtype(bin) do
-    Regex.named_captures(~r/.*::(?<type>[[:lower:]]+)$/, bin)
-    |> case do
-      nil -> bin
-      _struct -> Regex.replace(~r/::[[:lower:]]+$/, bin, "")
-    end
-    |> Jason.decode()
+    Knowit.Postgrex.Parser.parse!(bin)
   end
 
   # Use quoted expression to decode the data to a string. Decoding matches
