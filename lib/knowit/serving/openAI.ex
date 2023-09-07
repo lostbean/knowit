@@ -45,11 +45,28 @@ defmodule Knowit.Serving.OpenAI do
       OpenAI.chat_completion(
         model: "gpt-3.5-turbo",
         messages: [
-          %{role: "system", content: "Your a repoter"},
+          %{role: "system", content: "Your a reporter"},
           %{role: "user", content: "Make 5 objective questions to know me better"}
         ]
       )
 
     Enum.map(res.choices, & &1["message"]["content"]) |> Enum.flat_map(&String.split(&1, "\n"))
   end
+
+  def get_keywords(text) do
+    {:ok, res} =
+      OpenAI.chat_completion(
+        model: "gpt-3.5-turbo",
+        messages: [
+          %{role: "system", content: """
+            Extract the keywords of the given text as JSON list (example: ["keyword_1"]) \
+            and just reply with the JSON list.
+            """},
+          %{role: "user", content: text}
+        ]
+      )
+
+    Enum.map(res.choices, & &1["message"]["content"]) |> Enum.flat_map(&Jason.decode!/1)
+  end
+
 end

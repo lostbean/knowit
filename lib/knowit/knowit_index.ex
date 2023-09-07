@@ -2,6 +2,7 @@ defmodule Knowit.KnowitIndex do
   import Ecto.Query
   alias Knowit.DB.{ExperimentSet, SemanticIndex}
   alias Knowit.Repo
+  import Pgvector.Ecto.Query
 
   def insert_into_graph([origin, link, target], %ExperimentSet{} = experiment_set) do
     set_id = experiment_set.id
@@ -16,6 +17,7 @@ defmodule Knowit.KnowitIndex do
       RETURN id(a), id(link), id(b)
     $$) as (a agtype, link agtype, b agtype);
     """
+
     {:ok, %Postgrex.Result{:rows => rows}} = Repo.query(query_str, [])
     Enum.map(rows, &Enum.map(&1, fn {:ok, data} -> data end))
   end
@@ -31,22 +33,27 @@ defmodule Knowit.KnowitIndex do
 
   def insert_triple([origin, link, target] = triple, %ExperimentSet{} = experiment_set) do
     [[origin_id, link_id, target_id] = triple_ids] = insert_into_graph(triple, experiment_set)
+
     Task.await_many([
       Task.async(fn -> semanticIndex(origin, origin_id) end),
       Task.async(fn -> semanticIndex(link, link_id) end),
       Task.async(fn -> semanticIndex(target, target_id) end)
     ])
+
     triple_ids
   end
 
   defmacro exists_frag() do
-    arguments = ["""
-    SELECT *
-    FROM cypher('knowit_graph', $$
-      MATCH (a)-[link]->(b)
-      RETURN a.value, link.value, b.value, a.set_id
-    $$) as (origin agtype, link agtype, target agtype, set_id agtype)
-    """]
+    arguments = [
+      """
+      SELECT *
+      FROM cypher('knowit_graph', $$
+        MATCH (a)-[link]->(b)
+        RETURN a.value, link.value, b.value, a.set_id
+      $$) as (origin agtype, link agtype, target agtype, set_id agtype)
+      """
+    ]
+
     quote do: fragment(unquote_splicing(arguments))
   end
 
@@ -67,6 +74,29 @@ defmodule Knowit.KnowitIndex do
     end
   end
 
+  def semanticKeywordSearch(text) do
+    %{embedding: %Nx.Tensor{} = embedding} =
+      Nx.Serving.batched_run(Knowit.Serving.TextToVec, text)
 
+    Repo.all(
+      from i in SemanticIndex,
+        select: %{content: i.content, graph_id: i.graph_id},
+        order_by: cosine_distance(i.embedding, ^embedding),
+        limit: 5
+    )
+  end
 
+  def keywordSearch(text) do
+    from(
+      f in SemanticIndex,
+      cross_join: q in fragment("plainto_tsquery('english', ?)", ^text),
+      where: fragment("to_tsvector('english', ?) @@ ?", f.content, q),
+      order_by: [
+        desc: fragment("ts_rank_cd(to_tsvector('english', ?), ?)", f.content, q)
+      ],
+      limit: 5,
+      select: %{content: f.content, graph_id: f.graph_id}
+    )
+    |> Repo.all()
+  end
 end
