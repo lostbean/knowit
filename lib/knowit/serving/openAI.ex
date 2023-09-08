@@ -20,7 +20,8 @@ defmodule Knowit.Serving.OpenAI do
               You are a knowledge graph specialist. Your objective \
               is to extract RDF triples from the text using properties \
               and types defined in Schema.org . Make the output simple \
-              and only list the triples as JSON lists.
+              and only list the triples as JSON lists. Example of output:
+              [["Edgar", "hasLocation", "Brazil"],["Brazil", "hasPopulationSize", "200M"]]
               """
           },
           # %{role: "assistant", content: "[[John, drives, Tesla], [Tesla, has color, green], [John, has grilfriend, Ana]]"},
