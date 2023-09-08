@@ -4,6 +4,11 @@ defmodule Knowit.KnowitIndex do
   alias Knowit.Repo
   import Pgvector.Ecto.Query
 
+  def normalizeAndSplit(text) do
+    String.split(text, ~r'(?<=[a-z])(?=[A-Z])|[ _-]+')
+    |> Enum.map(&String.downcase/1)
+  end
+
   def insert_into_graph([origin, link, target], %ExperimentSet{} = experiment_set) do
     set_id = experiment_set.id
     link_label = String.replace(link, ~r/[\W_]+/, "")
@@ -23,10 +28,11 @@ defmodule Knowit.KnowitIndex do
   end
 
   defp semanticIndex(text, obj_id) do
+    norm = normalizeAndSplit(text) |> Enum.join(" ")
     %{embedding: %Nx.Tensor{} = embedding} =
-      Nx.Serving.batched_run(Knowit.Serving.TextToVec, text)
+      Nx.Serving.batched_run(Knowit.Serving.TextToVec, norm)
 
-    %SemanticIndex{embedding: embedding, content: text, graph_id: obj_id}
+    %SemanticIndex{embedding: embedding, content: norm, graph_id: obj_id}
     |> SemanticIndex.changeset()
     |> Repo.insert(on_conflict: :nothing)
   end
