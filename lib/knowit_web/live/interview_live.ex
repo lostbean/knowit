@@ -16,6 +16,7 @@ defmodule KnowitWeb.InterviewLive do
     DiscordBot.subscribe()
     WaBot.subscribe()
     send(self(), :list_experiment_sets)
+    send(self(), :select_latest_set)
 
     {:ok,
      assign(socket,
