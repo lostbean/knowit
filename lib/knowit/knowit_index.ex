@@ -28,17 +28,19 @@ defmodule Knowit.KnowitIndex do
   end
 
   defp semanticIndex(text, obj_id) do
-    norm = normalizeAndSplit(text) |> Enum.join(" ")
     %{embedding: %Nx.Tensor{} = embedding} =
-      Nx.Serving.batched_run(Knowit.Serving.TextToVec, norm)
+      Nx.Serving.batched_run(Knowit.Serving.TextToVec, text)
 
-    %SemanticIndex{embedding: embedding, content: norm, graph_id: obj_id}
+    %SemanticIndex{embedding: embedding, content: text, graph_id: obj_id}
     |> SemanticIndex.changeset()
     |> Repo.insert(on_conflict: :nothing)
   end
 
-  def insert_triple([origin, link, target] = triple, %ExperimentSet{} = experiment_set) do
-    [[origin_id, link_id, target_id] = triple_ids] = insert_into_graph(triple, experiment_set)
+  def insert_triple([origin_raw, link_raw, target_raw], %ExperimentSet{} = experiment_set) do
+    origin = normalizeAndSplit(origin_raw) |> Enum.join(" ")
+    link = normalizeAndSplit(link_raw) |> Enum.join(" ")
+    target = normalizeAndSplit(target_raw) |> Enum.join(" ")
+    [[origin_id, link_id, target_id] = triple_ids] = insert_into_graph([origin, link, target], experiment_set)
 
     # TODO: Fix NX batched_run to run concurrently:
     # Task.await_many([
