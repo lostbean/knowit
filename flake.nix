@@ -31,7 +31,7 @@
             ] ++ optionals stdenv.isDarwin [
               # Dev environment
               flyctl
-              postgresql
+              (postgresql_15.withPackages (p: [ p.age p.pgrouting p.pgvector ]))
               docker
             ] ++ optionals stdenv.isLinux [
               # Docker build
@@ -51,6 +51,10 @@
             ];
 
           shellHook = ''
+            export PGDATA=$(pwd)/.pg_data/knowit_dev
+            pg_ctl -D $PGDATA -l logfile restart
+            psql knowit_dev -tAc 'ALTER ROLE postgres WITH SUPERUSER' || true
+
             printf '\u001b[32m
             Know-it!
             \e[0m
