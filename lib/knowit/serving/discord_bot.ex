@@ -10,7 +10,7 @@ defmodule Knowit.Serving.DiscordBot do
   end
 
   def handle_event({:MESSAGE_CREATE, msg, _ws_state}) do
-    Logger.warn("from #{msg.author.username}: #{msg.content}")
+    Logger.warning("from #{msg.author.username}: #{msg.content}")
     KnowitWeb.Endpoint.broadcast_from(self(), @topic, "msg", msg)
 
     case msg.content do

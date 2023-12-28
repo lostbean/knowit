@@ -27,7 +27,8 @@ defmodule KnowitWeb.AudioToTextLive do
     # We always pre-process audio on the client into a single channel
     audio = Nx.from_binary(binary, :f32)
 
-    transcription_task = Task.async(fn -> Nx.Serving.batched_run(Knowit.Serving.AudioToText, audio) end)
+    transcription_task =
+      Task.async(fn -> Nx.Serving.batched_run(Knowit.Serving.AudioToText, audio) end)
 
     {:noreply, assign(socket, transcription_task: transcription_task)}
   end
@@ -39,24 +40,21 @@ defmodule KnowitWeb.AudioToTextLive do
     Process.demonitor(ref, [:flush])
     %{results: [%{text: text}]} = result
 
-    Logger.warn "transcription: #{text}"
+    Logger.warning("transcription: #{text}")
     graph_task = Task.async(fn -> Knowit.Serving.OpenAI.extract_knowledge_graph(text) end)
 
-    {:noreply, assign(socket, transcription: text, transcription_task: nil, graph_task: graph_task)}
+    {:noreply,
+     assign(socket, transcription: text, transcription_task: nil, graph_task: graph_task)}
   end
 
   @impl true
   def handle_info({ref, result}, socket) when socket.assigns.graph_task.ref == ref do
     Process.demonitor(ref, [:flush])
     kg = result |> Enum.map(&Enum.join(&1, " <> "))
-    Logger.warn "graph:\n#{kg |> Enum.join("\n")}"
+    Logger.warning("graph:\n#{kg |> Enum.join("\n")}")
     {:noreply, assign(socket, graph: kg, graph_task: nil)}
   end
 
-
-
-
   @impl true
   def handle_info(_info, socket), do: {:noreply, socket}
-
 end

@@ -6,15 +6,20 @@ defmodule KnowitWeb.WaWebhookController do
 
   def hook(conn, params) do
     WaBot.process_hooked_event(params)
+
     conn
-      |> Conn.send_resp(:ok, "")
+    |> Conn.send_resp(:ok, "")
   end
 
-  def link_hook(conn, %{ "hub.challenge" => challenge, "hub.mode" => "subscribe", "hub.verify_token" => token}) do
-    Logger.warn(token)
-    Logger.warn(challenge)
-    conn
-      |> Conn.send_resp(:ok, challenge)
-  end
+  def link_hook(conn, %{
+        "hub.challenge" => challenge,
+        "hub.mode" => "subscribe",
+        "hub.verify_token" => token
+      }) do
+    Logger.warning(token)
+    Logger.warning(challenge)
 
+    conn
+    |> Conn.send_resp(:ok, challenge)
+  end
 end

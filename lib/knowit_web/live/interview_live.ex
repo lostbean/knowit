@@ -48,7 +48,7 @@ defmodule KnowitWeb.InterviewLive do
   @impl true
   def handle_event("text_input", input, socket) do
     if String.length(input) > 0 do
-      Logger.warn(input)
+      Logger.warning(input)
       graph_task = extractTriples(input)
       {:noreply, assign(socket, graph_task: graph_task)}
     else
@@ -67,7 +67,11 @@ defmodule KnowitWeb.InterviewLive do
     {:noreply, socket}
   end
 
-  def handle_event("rename_experiment_set", %{"rename_set_id" => set_id, "rename_to" => text}, socket) do
+  def handle_event(
+        "rename_experiment_set",
+        %{"rename_set_id" => set_id, "rename_to" => text},
+        socket
+      ) do
     Knowit.DB.rename_experiment_set(text, socket.assigns.current_user, set_id)
     send(self(), :list_experiment_sets)
     {:noreply, socket}
@@ -81,7 +85,7 @@ defmodule KnowitWeb.InterviewLive do
   end
 
   def handle_event(event, _input, socket) do
-    Logger.warn("UNHANDLED EVENT: #{event}")
+    Logger.warning("UNHANDLED EVENT: #{event}")
     {:noreply, socket}
   end
 
@@ -106,7 +110,7 @@ defmodule KnowitWeb.InterviewLive do
   def handle_info({ref, result}, socket) when socket.assigns.transcription_task.ref == ref do
     Process.demonitor(ref, [:flush])
     %{results: [%{text: text}]} = result
-    Logger.warn("transcription: #{text}")
+    Logger.warning("transcription: #{text}")
     {:noreply, assign(socket, transcription: text, transcription_task: nil)}
   end
 
@@ -115,7 +119,7 @@ defmodule KnowitWeb.InterviewLive do
     Process.demonitor(ref, [:flush])
 
     triples_text = result |> Enum.map(&Enum.join(&1, " <> "))
-    Logger.warn("graph:\n#{triples_text |> Enum.join("\n")}")
+    Logger.warning("graph:\n#{triples_text |> Enum.join("\n")}")
 
     saveTriples(result, socket.assigns.current_user, socket.assigns.selected_set_id)
 
@@ -131,7 +135,7 @@ defmodule KnowitWeb.InterviewLive do
   @impl true
   def handle_info(%{topic: @wa_topic, event: "msg", payload: payload}, socket) do
     if String.length(payload.msg) > 0 do
-      Logger.warn("extracting triples from #{payload.from}: #{payload.msg}")
+      Logger.warning("extracting triples from #{payload.from}: #{payload.msg}")
       graph_task = extractTriples(payload.msg)
       {:noreply, assign(socket, graph_task: graph_task)}
     else
@@ -142,7 +146,7 @@ defmodule KnowitWeb.InterviewLive do
   @impl true
   def handle_info(%{topic: @discord_topic, event: "msg", payload: msg}, socket) do
     if String.length(msg.content) > 0 do
-      Logger.warn("extracting triples from #{msg.author.username}: #{msg.content}")
+      Logger.warning("extracting triples from #{msg.author.username}: #{msg.content}")
       graph_task = extractTriples(msg.content)
       {:noreply, assign(socket, graph_task: graph_task)}
     else
@@ -179,7 +183,7 @@ defmodule KnowitWeb.InterviewLive do
 
   @impl true
   def handle_info(_info, socket) do
-    Logger.warn("UNHANDLED INFO")
+    Logger.warning("UNHANDLED INFO")
     {:noreply, socket}
   end
 
@@ -200,9 +204,10 @@ defmodule KnowitWeb.InterviewLive do
 
   def assign_selected_set_id_to_socket(socket, set_id) do
     triples = KnowitIndex.list_experiment(socket.assigns.current_user, set_id)
+
     socket
-      |> assign(selected_set_id: set_id)
-      |> push_event("reset_points", %{points: genCytoscapeData(triples)})
+    |> assign(selected_set_id: set_id)
+    |> push_event("reset_points", %{points: genCytoscapeData(triples)})
   end
 
   def saveTriples(triples, user, set_id) do
@@ -212,7 +217,7 @@ defmodule KnowitWeb.InterviewLive do
       Knowit.TaskSupervisor,
       fn ->
         set = DB.get_experiment_set(user, set_id)
-        triples |> Enum.map(&(KnowitIndex.insert_triple(&1, set)))
+        triples |> Enum.map(&KnowitIndex.insert_triple(&1, set))
       end,
       options
     )
@@ -236,16 +241,20 @@ defmodule KnowitWeb.InterviewLive do
       class="card block align-middle text-align-center translate-x-6"
       phx-click="delete_experiment_set"
       value={@experiment_set.id}
-    ><img src="/images/trashcan.svg" class="w-4 h-5"/></button>
+    >
+      <img src="/images/trashcan.svg" class="w-4 h-5" />
+    </button>
     <div
       class={
         if @selected,
           do: "card block m-2 p-2 btn-primary-selected translate-x-6 duration-300",
-          else: "card block m-2 p-2 btn-primary z-0"}
+          else: "card block m-2 p-2 btn-primary z-0"
+      }
       phx-click={
         if @selected,
           do: "noop",
-          else: "select_set"}
+          else: "select_set"
+      }
       phx-value-set-id={@experiment_set.id}
     >
       <div class="card-content">
@@ -258,7 +267,8 @@ defmodule KnowitWeb.InterviewLive do
           contenteditable={
             if @selected,
               do: "true",
-              else: "false"}
+              else: "false"
+          }
         ><%= @experiment_set.name %></p>
         <p class="text-xs"><%= @experiment_set.updated_at %></p>
       </div>
