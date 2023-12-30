@@ -31,7 +31,8 @@
             ] ++ optionals stdenv.isDarwin [
               # Dev environment
               flyctl
-              (postgresql_15.withPackages (p: [ p.age p.pgrouting p.pgvector ]))
+              (postgresql_15.withPackages
+                (p: [ p.age p.pgrouting p.postgis p.pgvector ]))
               docker
             ] ++ optionals stdenv.isLinux [
               # Docker build

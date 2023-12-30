@@ -40,7 +40,9 @@ defmodule Knowit.KnowitIndex do
     origin = normalizeAndSplit(origin_raw) |> Enum.join(" ")
     link = normalizeAndSplit(link_raw) |> Enum.join(" ")
     target = normalizeAndSplit(target_raw) |> Enum.join(" ")
-    [[origin_id, link_id, target_id] = triple_ids] = insert_into_graph([origin, link, target], experiment_set)
+
+    [[origin_id, link_id, target_id] = triple_ids] =
+      insert_into_graph([origin, link, target], experiment_set)
 
     # TODO: Fix NX batched_run to run concurrently:
     # Task.await_many([
@@ -129,10 +131,26 @@ defmodule Knowit.KnowitIndex do
     rows
   end
 
+  def findRelevantDataPGR(ids) do
+    id_list = Enum.join(ids, ",")
+
+    query_str = """
+    SELECT * FROM pgr_dijkstra(
+      'SELECT * FROM cypher(''knowit_graph'', $$ MATCH (n)-[v]->(m) RETURN id(v), id(n), id(m), 1.0 $$) as (id bigint, source bigint, target bigint, cost float)',
+      ARRAY[#{id_list}],
+      ARRAY[#{id_list}],
+      directed := false
+    );
+    """
+
+    {:ok, %Postgrex.Result{:rows => rows}} = Repo.query(query_str, [])
+    rows
+  end
+
   def findRelatedDataFromKeywords(keywords) do
     keywords
     |> searchRelevantGraphEntries()
     |> Enum.map(& &1.graph_id)
-    |> findRelevantData()
+    |> findRelevantDataPGR()
   end
 end
