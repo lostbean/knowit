@@ -134,13 +134,39 @@ defmodule Knowit.KnowitIndex do
   def findRelevantDataPGR(ids) do
     id_list = Enum.join(ids, ",")
 
+    # run dijkstra on the permutation of the keywords and re-join nodes and edges
+    # the return need to be exploded (unnest) due mixed type (agtype[]) in Postgrex.Types
     query_str = """
-    SELECT * FROM pgr_dijkstra(
-      'SELECT * FROM cypher(''knowit_graph'', $$ MATCH (n)-[v]->(m) RETURN id(v), id(n), id(m), 1.0 $$) as (id bigint, source bigint, target bigint, cost float)',
-      ARRAY[#{id_list}],
-      ARRAY[#{id_list}],
-      directed := false
-    );
+    WITH D AS (
+        SELECT * FROM pgr_dijkstra(
+        'SELECT * FROM cypher(''knowit_graph'', $$ MATCH (n)-[v]->(m) RETURN id(v), id(n), id(m), 1.0 $$) as (id bigint, source bigint, target bigint, cost float)',
+        ARRAY[#{id_list}],
+        ARRAY[#{id_list}],
+        directed := true
+        )
+    ), N AS (
+        SELECT * FROM cypher('knowit_graph', $$
+            MATCH (n)
+            RETURN id(n), n $$
+        ) as (id bigint, node agtype)
+    ), E AS (
+        SELECT * FROM cypher('knowit_graph', $$
+            MATCH ()-[e]-()
+            RETURN id(e), e $$
+        ) as (id bigint, edge agtype)
+    ), D_AGE AS (
+        SELECT
+            D.seq,
+            D.path_seq,
+            D.start_vid,
+            D.end_vid,
+            N.node,
+            E.edge,
+            D.cost,
+            D.agg_cost
+        FROM D JOIN N ON N.id = D.node JOIN E ON E.id = D.edge
+    )
+    SELECT start_vid, end_vid, unnest(flatMap(ARRAY[node, edge])) AS path FROM D_AGE GROUP BY start_vid, end_vid;
     """
 
     {:ok, %Postgrex.Result{:rows => rows}} = Repo.query(query_str, [])
